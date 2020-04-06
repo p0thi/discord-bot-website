@@ -4,53 +4,71 @@
       <div class="d-flex align-center">
         <v-img
           alt="Vuetify Logo"
-          class="shrink mr-2"
+          class="shrink mr-2 round-img elevation-2"
           contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          src="@/assets/logo.png"
           transition="scale-transition"
           width="40"
         />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+        <h1>Pothi-Bot</h1>
       </div>
 
       <v-spacer></v-spacer>
 
+      <v-btn v-if="isLoggedIn" @click="logout" text>
+        <span class="mr-2">Logout</span>
+        <v-icon>mdi-logout</v-icon>
+      </v-btn>
       <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
+        v-else
+        @click="login"
+        :loading="authStatus === 'auth' || authStatus === 'login'"
         text
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+        <span class="mr-2">Login mit discord</span>
+        <v-icon>mdi-discord</v-icon>
       </v-btn>
+
+      <template v-slot:extension>
+        <v-tabs align-with-title>
+          <v-tab to="/">Home</v-tab>
+          <v-tab to="/guilds">Discord Server</v-tab>
+          <!-- <v-tab v-if="isLoggedIn">Einstellungen</v-tab> -->
+        </v-tabs>
+      </template>
     </v-app-bar>
 
     <v-content>
-      <HelloWorld />
+      <v-container>
+        <router-view> </router-view>
+      </v-container>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "App",
 
-  components: {
-    HelloWorld
+  components: {},
+  computed: {
+    ...mapGetters(["isLoggedIn", "authStatus"])
   },
-
+  methods: {
+    ...mapActions(["login", "logout"])
+  },
   data: () => ({
     //
   })
 };
 </script>
+<style lang="scss">
+#app {
+  background-color: #f5f5f5;
+}
+.round-img {
+  border-radius: 50%;
+}
+</style>

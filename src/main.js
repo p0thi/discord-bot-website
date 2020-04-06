@@ -4,7 +4,11 @@ import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
 
+import interceptorsSetup from "./util/axiosErrorHandle";
+
 Vue.config.productionTip = false;
+
+interceptorsSetup();
 
 new Vue({
   router,
