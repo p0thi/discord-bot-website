@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const CLIENT_ID = "234278013225795585";
+const CLIENT_ID = process.env.VUE_APP_CLIENT_ID;
 const BASE_URL = "https://discordapp.com/api/oauth2/authorize";
 const REDIRECT_URL = `${document.location.origin}/api/auth/callback`;
 const URL = `${BASE_URL}?client_id=${CLIENT_ID}&scope=identify+guilds&response_type=code&redirect_uri=${encodeURIComponent(
