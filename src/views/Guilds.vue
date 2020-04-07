@@ -146,7 +146,7 @@
               ></sound-list-tile>
             </v-col>
           </v-row>
-          <v-row v-if="paginationLength > 0">
+          <v-row v-if="paginationLength > 1">
             <v-col>
               <v-pagination
                 :length="paginationLength"
@@ -188,7 +188,7 @@ export default {
         if (!newVal) {
           return;
         }
-        this.activeGuild = newVal[0];
+        this.activeGuild = this.activeGuild || newVal[0];
         for (const guild of newVal) {
           if (!guild.icon) {
             continue;
@@ -264,6 +264,7 @@ export default {
           this.$toast.success(
             `Befehl <b>${this.addSoundFormData.command}</b> erfolgreich gespeichert.`
           );
+          this.fetchGuilds("Upload");
         })
         .catch(e => {
           console.log("error");
@@ -276,6 +277,19 @@ export default {
   },
   computed: {
     ...mapGetters(["guilds"]),
+    activeGuild: {
+      get() {
+        for (const guild of this.guilds) {
+          if (guild.id === this.activeGuildId) {
+            return guild;
+          }
+        }
+        return undefined;
+      },
+      set(value) {
+        this.activeGuildId = value ? value.id : undefined;
+      }
+    },
     activeGuildCommands() {
       if (!this.activeGuild) {
         return [];
@@ -323,7 +337,7 @@ export default {
       soundsPerPage: 16,
       guildColors: {},
       soundSearchString: "",
-      activeGuild: undefined,
+      activeGuildId: undefined,
       soundPlaying: false,
       addSoundDialog: false,
       addSoundFormData: {

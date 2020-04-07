@@ -28,7 +28,7 @@ import { mapActions } from "vuex";
 export default {
   //   name: "sound-list-tile",
   methods: {
-    ...mapActions["fetchGuilds"],
+    ...mapActions(["fetchGuilds"]),
     playSound() {
       this.soundPlaying = true;
       axios
@@ -55,7 +55,6 @@ export default {
         buttonTrueText: "Ja",
         buttonFalseText: "Nein"
       }).then(res => {
-        console.log("res", res);
         if (res) {
           axios({
             url: "/api/sounds/delete",
@@ -65,16 +64,11 @@ export default {
             }
           })
             .then(() => {
-              console.log("success");
-              this.fetchGuilds();
-              this.$toast.success(
-                `Befehl ${this.sound.command} erfolgreich gelöscht`
-              );
+              this.$toast.success(`Befehl erfolgreich gelöscht`);
+              this.fetchGuilds("Sound deletion");
             })
-            .atch(e => {
-              this.$toast.error(
-                `Der Befehl konnte nicht gelöscht werden. ${e.data.message}`
-              );
+            .catch(() => {
+              this.$toast.error(`Der Befehl konnte nicht gelöscht werden.`);
             });
         }
       });
