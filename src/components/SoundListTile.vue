@@ -1,5 +1,5 @@
 <template>
-  <v-card tile>
+  <v-card outlined>
     <v-card-title>
       <span>{{ commandPrefix }}</span>
       <span>{{ sound.command }}</span>

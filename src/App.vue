@@ -43,7 +43,7 @@
       <template v-slot:extension>
         <v-tabs align-with-title>
           <v-tab to="/">Home</v-tab>
-          <v-tab to="/guilds">Discord Server</v-tab>
+          <v-tab to="/guilds">Meine Discord Server</v-tab>
           <!-- <v-tab v-if="isLoggedIn">Einstellungen</v-tab> -->
         </v-tabs>
       </template>

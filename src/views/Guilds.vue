@@ -13,7 +13,7 @@
                 v-for="guild in guilds"
                 :key="guild.id"
                 :class="{ 'mx-3': guild !== activeGuild, 'my-3': true }"
-                :elevation="guild === activeGuild ? 5 : 2"
+                :elevation="guild === activeGuild ? 5 : 0"
                 @click="
                   () => {
                     activeGuild = guild;
@@ -264,7 +264,7 @@ export default {
       }
     },
     getPalette(id) {
-      return this.guildColors[id] || { first: "white", second: "black" };
+      return this.guildColors[id] || { first: "#f4f4f4", second: "black" };
     },
     closeUploadSoundDialog() {
       this.addSoundDialog = false;
