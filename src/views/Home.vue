@@ -25,12 +25,12 @@
           <v-card-title>Befehle im Server-Chat</v-card-title>
           <v-card-text>
             Vor jedem Befehl im Server Chat muss ein Kommando-Symbol stehen.
-            Normalerseise ist dies ein
-            <b>!</b> (Ausrufungszeichen). <br />Es kann aber möglichwesiese in
+            Normalerweise ist dies ein
+            <b>!</b> (Ausrufungszeichen). <br />Es kann aber möglicherweise in
             manchen Servern geändert worden sein.<br />
             <router-link to="/guilds">Hier</router-link> kannst du nachsehen,
             welches Kommando-Symbol für deinen Server eingestellt ist <br />Zur
-            besserern Darstellung wird hier der Standard dargestellt
+            besseren Darstellung wird hier der Standard dargestellt
           </v-card-text>
 
           <v-list-item two-line>
@@ -137,7 +137,7 @@
               <v-list-item-title>joinsound</v-list-item-title>
               <v-list-item-subtitle>
                 Damit startest du den Prozess, um für einen Server einen
-                Join-Sound fürr dich einzustellen.
+                Join-Sound für dich einzustellen.
               </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>

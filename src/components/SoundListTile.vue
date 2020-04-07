@@ -104,7 +104,7 @@ export default {
                 break;
               case 409:
                 this.$toast.error(
-                  "Du befindest dich in keinem Channel auf deisem Server, den der Bot erreichen kann.",
+                  "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
                   {
                     dismissable: true,
                     queueable: true

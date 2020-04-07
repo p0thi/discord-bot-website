@@ -135,7 +135,7 @@
                     color="blue darken-1"
                     text
                     @click="closeUploadSoundDialog"
-                    >Close</v-btn
+                    >Schließen</v-btn
                   >
                   <v-btn color="blue darken-1" text type="submit"
                     >Speichern</v-btn
