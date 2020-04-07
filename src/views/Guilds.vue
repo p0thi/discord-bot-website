@@ -23,18 +23,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{
-                      guild.name
-                    }}</v-card-title>
+                    <v-card-title class="headline">
+                      {{ guild.name }}
+                    </v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{ guild.commandPrefix }}
-                        </span>
+                        <span class="font-weight-bold">{{
+                          guild.commandPrefix
+                        }}</span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -65,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -166,7 +166,13 @@
               </v-card-text>
             </v-card>
           </v-menu>
-          <v-btn large @click="fetchGuilds" class="mr-5" icon>
+          <v-btn
+            :loading="fetchingGuilds"
+            large
+            @click="reload"
+            class="mr-5"
+            icon
+          >
             <v-icon>mdi-refresh</v-icon>
           </v-btn>
           <v-text-field
@@ -232,7 +238,7 @@ export default {
     console.log("guilds", this.guilds.length);
     if (!this.guilds || this.guilds.length === 0) {
       console.log("fetching guilds");
-      this.fetchGuilds("guild created");
+      this.reload();
     }
   },
   watch: {
@@ -285,6 +291,12 @@ export default {
   },
   methods: {
     ...mapActions(["fetchGuilds"]),
+    reload() {
+      this.fetchingGuilds = true;
+      this.fetchGuilds().finally(() => {
+        this.fetchingGuilds = false;
+      });
+    },
     soundJoinValueChanged(sound, newVal) {
       console.log(`${sound.command} - ${newVal}`);
       if (newVal) {
@@ -331,7 +343,7 @@ export default {
           this.$toast.success(
             `Befehl <b>${this.addSoundFormData.command}</b> erfolgreich gespeichert.`
           );
-          this.fetchGuilds("Upload");
+          this.reload();
         })
         .catch(e => {
           console.log("error");
@@ -410,10 +422,13 @@ export default {
     return {
       currentSoundPage: 1,
       soundsPerPage: 16,
-      guildColors: {},
       soundSearchString: "",
-      activeGuildId: undefined,
+
       soundPlaying: false,
+
+      fetchingGuilds: false,
+      guildColors: {},
+      activeGuildId: undefined,
 
       addSoundDialog: false,
       addSoundFormData: {
