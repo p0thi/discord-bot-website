@@ -9,20 +9,22 @@ export default function setup(vue) {
         case 401:
           store.dispatch("logout");
           vue.$toast.error(
-            "Du wurdest durch einen Fehler automatisch abgemeldet"
+            "Du wurdest durch einen Fehler automatisch abgemeldet",
+            {
+              dismissable: true,
+              queueable: true
+            }
           );
           break;
         case 429:
           vue.$toast.error(
-            "Du musst warten, bevor du weitere Befehle senden kannst"
+            "Du musst warten, bevor du weitere Befehle senden kannst",
+            {
+              dismissable: true,
+              queueable: true
+            }
           );
           break;
-        default:
-          if (err.data && err.data.message) {
-            vue.$toast.error(err.data.message);
-          } else {
-            vue.$toast.error("Es ist ein Fehler aufgetreten");
-          }
       }
 
       return Promise.reject(err);

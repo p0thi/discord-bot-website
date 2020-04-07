@@ -16,9 +16,9 @@
             <v-icon>mdi-location-enter</v-icon>
           </v-btn>
         </template>
-        <span>{{
-          isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv"
-        }}</span>
+        <span>
+          {{ isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv" }}
+        </span>
       </v-tooltip>
     </v-card-title>
     <v-card-subtitle>{{ sound.description }}</v-card-subtitle>
@@ -92,10 +92,25 @@ export default {
         })
         .catch(e => {
           if (e.response) {
-            if (e.response.status === 429) {
-              this.$toast.error(
-                "Du musst kurz warten, bevor du weitere Befehle senden kannst"
-              );
+            switch (e.response.status) {
+              case 429:
+                this.$toast.error(
+                  "Du musst kurz warten, bevor du weitere Befehle senden kannst",
+                  {
+                    dismissable: true,
+                    queueable: true
+                  }
+                );
+                break;
+              case 409:
+                this.$toast.error(
+                  "Du befindest dich in keinem Channel auf deisem Server, den der Bot erreichen kann.",
+                  {
+                    dismissable: true,
+                    queueable: true
+                  }
+                );
+                break;
             }
           }
         })
@@ -117,11 +132,17 @@ export default {
             }
           })
             .then(() => {
-              this.$toast.success(`Befehl erfolgreich gelöscht`);
+              this.$toast.success(`Befehl erfolgreich gelöscht`, {
+                dismissable: true,
+                queueable: true
+              });
               this.fetchGuilds("Sound deletion");
             })
             .catch(() => {
-              this.$toast.error(`Der Befehl konnte nicht gelöscht werden.`);
+              this.$toast.error(`Der Befehl konnte nicht gelöscht werden.`, {
+                dismissable: true,
+                queueable: true
+              });
             });
         }
       });
