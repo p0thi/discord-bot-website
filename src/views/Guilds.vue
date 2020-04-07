@@ -23,18 +23,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
-                        <span>Kommando-Symbol: </span>
-                        <span class="font-weight-bold">{{
-                          guild.commandPrefix
-                        }}</span>
+                        <span>Kommando-Symbol:</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -65,18 +65,16 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
-          <v-btn large @click="fetchGuilds" class="mr-5" icon>
-            <v-icon>mdi-refresh</v-icon>
-          </v-btn>
+
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
             <template v-slot:activator="{ on }">
               <v-btn color="primary" dark v-on="on">
@@ -139,6 +137,38 @@
               </v-form>
             </v-card>
           </v-dialog>
+          <v-spacer></v-spacer>
+          <v-menu :close-on-content-click="false">
+            <template v-slot:activator="{ on }">
+              <v-btn color="primary" dark v-on="on" icon>
+                <v-icon>mdi-sort-variant</v-icon>
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>Sortierung</v-card-title>
+              <v-card-text>
+                <v-btn-toggle v-model="sortDirection">
+                  <v-btn :value="-1" icon>
+                    <v-icon>mdi-sort-descending</v-icon>
+                  </v-btn>
+                  <v-btn :value="1" icon>
+                    <v-icon>mdi-sort-ascending</v-icon>
+                  </v-btn>
+                </v-btn-toggle>
+                <v-radio-group v-model="sortMethod">
+                  <v-radio
+                    v-for="(item, i) in sortings"
+                    :key="item.name"
+                    :label="item.name"
+                    :value="i"
+                  ></v-radio>
+                </v-radio-group>
+              </v-card-text>
+            </v-card>
+          </v-menu>
+          <v-btn large @click="fetchGuilds" class="mr-5" icon>
+            <v-icon>mdi-refresh</v-icon>
+          </v-btn>
           <v-text-field
             class="mx-4"
             v-model="soundSearchString"
@@ -337,7 +367,7 @@ export default {
       }
       return this.activeGuild.sounds.map(sound => sound.command);
     },
-    filteredActiveGuildSounds() {
+    filteredSortedActiveGuildSounds() {
       if (!this.activeGuild) {
         return [];
       }
@@ -355,11 +385,15 @@ export default {
         });
       }
 
+      let sortMethod = this.sortings[this.sortMethod];
+
+      result = sortMethod.sort(result, this.sortDirection);
+
       return result;
       // TODO
     },
     getPaginatedSounds() {
-      let sounds = this.filteredActiveGuildSounds;
+      let sounds = this.filteredSortedActiveGuildSounds;
       let paginated = sounds.slice(
         (this.currentSoundPage - 1) * this.soundsPerPage,
         this.currentSoundPage * this.soundsPerPage
@@ -368,7 +402,7 @@ export default {
     },
     paginationLength() {
       return Math.ceil(
-        this.filteredActiveGuildSounds.length / this.soundsPerPage
+        this.filteredSortedActiveGuildSounds.length / this.soundsPerPage
       );
     }
   },
@@ -380,12 +414,26 @@ export default {
       soundSearchString: "",
       activeGuildId: undefined,
       soundPlaying: false,
+
       addSoundDialog: false,
       addSoundFormData: {
         command: "",
         description: "",
         file: undefined
       },
+      sortDirection: 1,
+      sortMethod: 0,
+      sortings: [
+        {
+          name: "Alphabetisch",
+          sort(list, direction) {
+            return list.sort(
+              (a, b) => direction * a.command.localeCompare(b.command)
+            );
+          }
+        }
+      ],
+
       validationRules: {
         command: [
           v => !!v || "Befehl wird benötigt",
