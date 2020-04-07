@@ -23,18 +23,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{
-                      guild.name
-                    }}</v-card-title>
+                    <v-card-title class="headline">
+                      {{ guild.name }}
+                    </v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
-                        <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{ guild.commandPrefix }}
-                        </span>
+                        <span>Kommando-Symbol: </span>
+                        <span class="font-weight-bold">{{
+                          guild.commandPrefix
+                        }}</span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -65,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
           <v-btn large @click="fetchGuilds" class="mr-5" icon>
             <v-icon>mdi-refresh</v-icon>
@@ -206,6 +206,12 @@ export default {
     }
   },
   watch: {
+    $route: {
+      immediate: true,
+      handler(to) {
+        this.activeGuild = { id: to.query.guild };
+      }
+    },
     guilds: {
       immediate: true,
       handler(newVal) {
@@ -311,14 +317,18 @@ export default {
     activeGuild: {
       get() {
         for (const guild of this.guilds) {
-          if (guild.id === this.activeGuildId) {
+          // if (guild.id === this.activeGuildId) {
+          if (guild.id === this.$route.query.guild) {
             return guild;
           }
         }
         return undefined;
       },
       set(value) {
-        this.activeGuildId = value ? value.id : undefined;
+        if (value && value.id) {
+          this.$router.push({ query: { guild: value.id } }).catch(() => {});
+        }
+        // this.activeGuildId = value ? value.id : undefined;
       }
     },
     activeGuildCommands() {
