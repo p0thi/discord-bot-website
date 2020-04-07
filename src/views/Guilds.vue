@@ -5,9 +5,16 @@
         <v-card-title>Server</v-card-title>
         <v-card-text>
           <v-row dense>
-            <v-col v-if="!guilds || guilds.length === 0"
-              >Kein Server geladen oder vorhanden</v-col
-            >
+            <v-col v-if="!guilds || guilds.length === 0">
+              <span v-if="fetchingGuilds">
+                Lädt...
+                <v-progress-linear
+                  indeterminate
+                  color="primary"
+                ></v-progress-linear>
+              </span>
+              <span v-else>Kein Server geladen oder vorhanden</span>
+            </v-col>
             <v-col v-else cols="12">
               <v-card
                 v-for="guild in guilds"
@@ -23,18 +30,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">{{
-                          guild.commandPrefix
-                        }}</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -65,14 +72,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
