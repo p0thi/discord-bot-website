@@ -6,7 +6,7 @@
         <v-card-text>
           <v-row dense>
             <v-col v-if="!guilds || guilds.length === 0"
-              >Kein Server vorhanden</v-col
+              >Kein Server geladen oder vorhanden</v-col
             >
             <v-col v-else cols="12">
               <v-card
@@ -23,14 +23,20 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
-                    <!-- <v-card-subtitle :style="{ color: getPalette(guild.id).second }">
-                      Der Befehl Präfix ist "{{
-                      guild.commandPrefix
-                      }}"
-                    </v-card-subtitle>-->
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
+                    <v-card-subtitle
+                      :style="{ color: getPalette(guild.id).second }"
+                    >
+                      <div>{{ guild.sounds.length }} Sounds verfügbar</div>
+                      <div class="body-2 font-weight-thin">
+                        <span>Kommando-Symbol:</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
+                      </div>
+                    </v-card-subtitle>
                   </div>
                   <v-avatar
                     class="ma-3"
@@ -52,9 +58,21 @@
     <v-col v-if="activeGuild" cols="9">
       <v-card outlined>
         <v-card-title>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span>
+            <v-avatar
+              :color="!activeGuild.icon ? 'primary' : 'none'"
+              class="mr-3"
+              size="50"
+            >
+              <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
+            </v-avatar>
+          </span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
           <v-btn large @click="fetchGuilds" class="mr-5" icon>
             <v-icon>mdi-refresh</v-icon>
@@ -133,18 +151,24 @@
           ></v-text-field>
         </v-card-title>
         <v-card-text>
-          <v-row>
+          <v-row v-if="activeGuild && activeGuild.sounds.length > 0">
             <v-col
               v-for="(sound, i) in getPaginatedSounds"
               :key="sound.id + i"
               cols="3"
             >
               <sound-list-tile
+                @joinValueChanged="soundJoinValueChanged(sound, $event)"
                 :commandPrefix="activeGuild.commandPrefix"
                 :sound="sound"
+                :guildId="activeGuild.id"
                 :editable="sound.creator || activeGuild.owner"
+                :isJoinSound="activeGuild.joinSound === sound.id"
               ></sound-list-tile>
             </v-col>
+          </v-row>
+          <v-row v-else>
+            <v-col>Bisher keine Sounds verfügbar</v-col>
           </v-row>
           <v-row v-if="paginationLength > 1">
             <v-col>
@@ -225,7 +249,14 @@ export default {
   },
   methods: {
     ...mapActions(["fetchGuilds"]),
-
+    soundJoinValueChanged(sound, newVal) {
+      console.log(`${sound.command} - ${newVal}`);
+      if (newVal) {
+        this.$set(this.activeGuild, "joinSound", sound.id);
+      } else {
+        this.$delete(this.activeGuild, "joinSound");
+      }
+    },
     getPalette(id) {
       return this.guildColors[id] || { first: "white", second: "black" };
     },
@@ -304,7 +335,7 @@ export default {
 
       let result = sounds;
 
-      if (this.soundSearchString.length >= 2) {
+      if (this.soundSearchString && this.soundSearchString.length >= 2) {
         const searchString = this.soundSearchString.trim().toLowerCase();
         result = result.filter(sound => {
           return (

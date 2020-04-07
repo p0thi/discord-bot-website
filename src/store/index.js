@@ -27,9 +27,8 @@ const store = new Vuex.Store({
     login_request(state) {
       state.loginStatus = "login";
     },
-    auth_success(state, token, user) {
+    auth_success(state, token) {
       state.token = token;
-      state.user = user;
       state.loginStatus = "success";
     },
     auth_error(state) {
@@ -38,13 +37,17 @@ const store = new Vuex.Store({
     logout(state) {
       state.token = "";
       state.loginStatus = "logout";
+      state.user = {};
     },
     guilds(state, guilds) {
       state.guilds = guilds;
+    },
+    setUser(state, user) {
+      state.user = user;
     }
   },
   actions: {
-    login({ commit }) {
+    login({ commit, dispatch }) {
       return new Promise((resolve, reject) => {
         commit("auth_request");
         let authHandler = new AuthHandler();
@@ -56,11 +59,15 @@ const store = new Vuex.Store({
               .login(code)
               .then(loginResp => {
                 let token = loginResp.data.token;
-                let user = loginResp.data.user;
                 localStorage.setItem("token", token);
                 axios.defaults.headers.common["Authorization"] = token;
-                console.log(loginResp.data);
-                commit("auth_success", token, user);
+                commit("auth_success", token);
+                const redirect = router.history.current.query.redirect
+                  ? decodeURIComponent(router.history.current.query.redirect)
+                  : "/";
+                console.log("redirecting", redirect);
+                router.push(redirect);
+                dispatch("fetchUser");
                 resolve(loginResp);
               })
               .catch(err => {
@@ -89,12 +96,11 @@ const store = new Vuex.Store({
         resolve();
       });
     },
-    fetchGuilds({ commit, state }, source) {
+    fetchGuilds({ commit }, source) {
       return new Promise((resolve, reject) => {
         if (source) {
           console.log("source", source);
         }
-        console.log("fetchGuilds", state.token);
         axios
           .get("/api/guilds/all")
           .then(resp => {
@@ -104,6 +110,21 @@ const store = new Vuex.Store({
           })
           .catch(err => {
             reject(err);
+          });
+      });
+    },
+    fetchUser({ commit }) {
+      return new Promise((resolve, reject) => {
+        console.log();
+        axios
+          .get("/api/user/self")
+          .then(resp => {
+            commit("setUser", resp.data);
+            console.log("user fetched", resp.data);
+            resolve();
+          })
+          .catch(e => {
+            reject(e);
           });
       });
     }

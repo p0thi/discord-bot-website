@@ -15,10 +15,21 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn v-if="isLoggedIn" @click="logout" text>
-        <span class="mr-2">Logout</span>
-        <v-icon>mdi-logout</v-icon>
-      </v-btn>
+      <span v-if="isLoggedIn">
+        <v-sheet class="pa-2 mt-2">
+          <v-avatar size="35" class="mr-3">
+            <v-img :src="user.displayAvatarURL"></v-img>
+          </v-avatar>
+          <span class="title">{{ user.username }}</span>
+          <span class="body-1">#{{ user.discriminator }}</span>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-btn @click="logout" text>
+            <span class="mr-2">Logout</span>
+            <v-icon>mdi-logout</v-icon>
+          </v-btn>
+        </v-sheet>
+      </span>
+
       <v-btn
         v-else
         @click="login"
@@ -40,7 +51,7 @@
 
     <v-content>
       <v-container>
-        <router-view> </router-view>
+        <router-view></router-view>
       </v-container>
     </v-content>
   </v-app>
@@ -51,13 +62,15 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "App",
-
+  created() {
+    this.fetchUser();
+  },
   components: {},
   computed: {
-    ...mapGetters(["isLoggedIn", "authStatus"])
+    ...mapGetters(["isLoggedIn", "authStatus", "user"])
   },
   methods: {
-    ...mapActions(["login", "logout"])
+    ...mapActions(["login", "logout", "fetchUser"])
   },
   data: () => ({
     //

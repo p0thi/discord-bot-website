@@ -39,7 +39,9 @@ function requireAuth(to, from, next) {
   if (store.getters.isLoggedIn) {
     next();
   } else {
-    next("/login");
+    const redirect = encodeURIComponent(to.fullPath);
+    console.log("redirect", redirect);
+    next(`/login?redirect=${redirect}`);
   }
 }
 

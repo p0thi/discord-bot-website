@@ -3,12 +3,30 @@
     <v-card-title>
       <span>{{ commandPrefix }}</span>
       <span>{{ sound.command }}</span>
+      <v-spacer></v-spacer>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            v-on="on"
+            @click="toggleJoinSound"
+            :loading="changingJoinSound"
+            :color="isJoinSound ? 'primary' : '#c9c9c9'"
+            icon
+          >
+            <v-icon>mdi-location-enter</v-icon>
+          </v-btn>
+        </template>
+        <span>{{
+          isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv"
+        }}</span>
+      </v-tooltip>
     </v-card-title>
     <v-card-subtitle>{{ sound.description }}</v-card-subtitle>
     <v-card-actions>
       <v-btn :loading="soundPlaying" @click="playSound" color="success" icon>
         <v-icon large>mdi-play</v-icon>
       </v-btn>
+
       <v-spacer></v-spacer>
       <div v-if="editable">
         <!-- <v-btn icon>
@@ -29,13 +47,48 @@ export default {
   //   name: "sound-list-tile",
   methods: {
     ...mapActions(["fetchGuilds"]),
+    toggleJoinSound() {
+      this.$confirm(
+        `Willst du diesen Sound wirklich als Join-Sound ${
+          this.isJoinSound ? "DEAKTIVIEREN" : "AKTIVIEREN"
+        }?`,
+        {
+          buttonTrueText: "Ja",
+          buttonFalseText: "Nein"
+        }
+      ).then(res => {
+        if (res) {
+          this.changingJoinSound = true;
+          axios
+            .post(
+              "/api/sounds/joinsound",
+              {
+                ...(!this.isJoinSound && { sound: this.sound.id }),
+                ...(this.isJoinSound && { guild: this.guildId })
+              },
+              {
+                headers: {
+                  "Content-Type": "Application/json"
+                }
+              }
+            )
+            .then(() => {
+              this.$emit("joinValueChanged", !this.isJoinSound);
+            })
+            .finally(() => {
+              this.changingJoinSound = false;
+            });
+        }
+      });
+    },
     playSound() {
       this.soundPlaying = true;
       axios
         .get("/api/sounds/play", {
           params: {
             id: this.sound.id
-          }
+          },
+          timeout: 40000
         })
         .catch(e => {
           if (e.response) {
@@ -75,14 +128,18 @@ export default {
       return;
     }
   },
+  computed: {},
   props: {
     commandPrefix: { type: String, required: true },
     sound: { type: Object, required: true },
-    editable: { type: Boolean, default: false }
+    guildId: { type: String, required: true },
+    editable: { type: Boolean, default: false },
+    isJoinSound: { typpe: Boolean, default: false }
   },
   data() {
     return {
-      soundPlaying: false
+      soundPlaying: false,
+      changingJoinSound: false
     };
   }
 };

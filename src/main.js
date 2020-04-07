@@ -9,11 +9,11 @@ import interceptorsSetup from "./util/axiosErrorHandle";
 
 Vue.config.productionTip = false;
 
-interceptorsSetup();
-
-new Vue({
+const vue = new Vue({
   router,
   store,
   vuetify,
   render: h => h(App)
 }).$mount("#app");
+
+interceptorsSetup(vue);
