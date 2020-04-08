@@ -351,6 +351,7 @@ export default {
             `Befehl <b>${this.addSoundFormData.command}</b> erfolgreich gespeichert.`
           );
           this.reload();
+          this.$refs.addSoundForm.reset();
         })
         .catch(e => {
           console.log("error");
@@ -394,7 +395,13 @@ export default {
 
       let result = sounds;
 
-      if (this.soundSearchString && this.soundSearchString.length >= 2) {
+      if (
+        this.soundSearchString &&
+        typeof this.soundSearchString === "string" &&
+        this.soundSearchString.trim().length >= 2
+      ) {
+        console.log("filtering", this.soundSearchString);
+        console.log("with type", typeof this.soundSearchString);
         const searchString = this.soundSearchString.trim().toLowerCase();
         result = result.filter(sound => {
           return (
