@@ -30,14 +30,15 @@
         </v-sheet>
       </span>
 
-      <v-btn
-        v-else
-        @click="login"
-        :loading="authStatus === 'auth' || authStatus === 'login'"
-        text
-      >
+      <v-btn v-else @click="login" text>
         <span class="mr-2">Login mit discord</span>
-        <v-icon>mdi-discord</v-icon>
+        <v-progress-circular
+          :size="30"
+          :width="3"
+          indeterminate
+          v-if="authStatus === 'auth'"
+        ></v-progress-circular>
+        <v-icon v-else>mdi-discord</v-icon>
       </v-btn>
 
       <template v-slot:extension>
