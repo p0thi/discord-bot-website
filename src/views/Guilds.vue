@@ -276,6 +276,11 @@ export default {
         this.activeGuild = { id: to.query.guild };
       }
     },
+    paginationLength(to) {
+      if (to < this.currentSoundPage) {
+        this.currentSoundPage = to;
+      }
+    },
     guilds: {
       immediate: true,
       handler(newVal) {
@@ -418,25 +423,38 @@ export default {
       }
       let sounds = this.activeGuild.sounds;
 
+      sounds = sounds.concat(
+        sounds,
+        sounds,
+        sounds,
+        sounds,
+        sounds,
+        sounds,
+        sounds,
+        sounds,
+        sounds,
+        sounds
+      );
+
       let result = sounds;
-      console.log("array", result);
-      console.log("length", result.length);
+      // console.log("array", result);
+      // console.log("length", result.length);
       if (
         this.soundSearchString &&
         typeof this.soundSearchString === "string" &&
         this.soundSearchString.trim().length >= 2
       ) {
         const searchString = this.soundSearchString.trim().toLowerCase();
-        console.log("filtering", searchString);
-        console.log("with type", searchString);
+        // console.log("filtering", searchString);
+        // console.log("with type", searchString);
         result = result.filter(sound => {
           return (
             sound.command.toLowerCase().includes(searchString) ||
             sound.description.toLowerCase().includes(searchString)
           );
         });
-        console.log("after array", result);
-        console.log("after length", result.length);
+        // console.log("after array", result);
+        // console.log("after length", result.length);
       }
 
       let sortMethod = this.sortings[this.sortMethod];
