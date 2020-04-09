@@ -30,18 +30,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{
-                      guild.name
-                    }}</v-card-title>
+                    <v-card-title class="headline">
+                      {{ guild.name }}
+                    </v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{ guild.commandPrefix }}
-                        </span>
+                        <span class="font-weight-bold">{{
+                          guild.commandPrefix
+                        }}</span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -72,14 +72,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -249,6 +249,27 @@ export default {
     }
   },
   watch: {
+    ...(process.env.VUE_APP_ELECTRON_ENV && {
+      activeGuild: {
+        immediate: true,
+        deep: true,
+        handler(to, from) {
+          const ipcRenderer = require("electron").ipcRenderer;
+
+          const toSounds = to && to.sounds ? to.sounds : [];
+          const fromSounds = from && from.sounds ? from.sounds : [];
+
+          let remove = fromSounds.filter(x => !toSounds.includes(x));
+          let add = toSounds.filter(x => !fromSounds.includes(x));
+
+          console.log("remove:", remove.length);
+          console.log("add:", add.length);
+
+          remove.forEach(x => ipcRenderer.send("remove-sound", x));
+          add.forEach(x => ipcRenderer.send("add-sound", x));
+        }
+      }
+    }),
     $route: {
       immediate: true,
       handler(to) {
@@ -339,11 +360,15 @@ export default {
       //   }
 
       axios
-        .post("/api/sounds/upload", formData, {
-          headers: {
-            "Content-Type": "Application/json"
+        .post(
+          `${process.env.VUE_APP_API_BASE_URL}/api/sounds/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "Application/json"
+            }
           }
-        })
+        )
         .then(res => {
           console.log(res);
           this.addSoundDialog = false;
@@ -354,9 +379,9 @@ export default {
           this.$refs.addSoundForm.reset();
         })
         .catch(e => {
-          console.log("error");
+          console.log("error", JSON.stringify(e.response.data.message));
           this.$toast.error(
-            `Befehl konnte nicht gespeichert werden: <b>${e.message}</b>`
+            `Befehl konnte nicht gespeichert werden: <b>${e.response.data.message}</b>`
           );
         });
       console.log(this.addSoundFormData.file);
@@ -394,21 +419,24 @@ export default {
       let sounds = this.activeGuild.sounds;
 
       let result = sounds;
-
+      console.log("array", result);
+      console.log("length", result.length);
       if (
         this.soundSearchString &&
         typeof this.soundSearchString === "string" &&
         this.soundSearchString.trim().length >= 2
       ) {
-        console.log("filtering", this.soundSearchString);
-        console.log("with type", typeof this.soundSearchString);
         const searchString = this.soundSearchString.trim().toLowerCase();
+        console.log("filtering", searchString);
+        console.log("with type", searchString);
         result = result.filter(sound => {
           return (
             sound.command.toLowerCase().includes(searchString) ||
             sound.description.toLowerCase().includes(searchString)
           );
         });
+        console.log("after array", result);
+        console.log("after length", result.length);
       }
 
       let sortMethod = this.sortings[this.sortMethod];
