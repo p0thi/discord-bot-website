@@ -365,15 +365,11 @@ export default {
       //   }
 
       axios
-        .post(
-          `${process.env.VUE_APP_API_BASE_URL}/api/sounds/upload`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "Application/json"
-            }
+        .post(`${this.baseUrl}/api/sounds/upload`, formData, {
+          headers: {
+            "Content-Type": "Application/json"
           }
-        )
+        })
         .then(res => {
           console.log(res);
           this.addSoundDialog = false;
@@ -467,6 +463,7 @@ export default {
   },
   data() {
     return {
+      baseUrl: process.env.VUE_APP_API_BASE_URL,
       currentSoundPage: 1,
       soundsPerPage: 16,
       soundSearchString: "",
