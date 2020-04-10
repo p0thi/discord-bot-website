@@ -95,7 +95,7 @@ export default class AuthHandler {
       axios
         .post(`${process.env.VUE_APP_API_BASE_URL}/api/auth/login`, {
           code,
-          redirect: REDIRECT_URL
+          redirect: "http://localhost/api/auth/callback"
         })
         .then(response => {
           console.log("response", response);
