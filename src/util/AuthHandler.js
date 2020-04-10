@@ -9,7 +9,7 @@ const CLIENT_ID = process.env.VUE_APP_CLIENT_ID;
 const BASE_URL = "https://discordapp.com/oauth2/authorize";
 const REDIRECT_URL = process.env.VUE_APP_ELECTRON_ENV
   ? "http://localhost/api/auth/callback"
-  : `${process.env.VUE_APP_API_BASE_URL}/api/auth/callback`;
+  : `${document.location.origin}/api/auth/callback`;
 const URL = `${BASE_URL}?client_id=${CLIENT_ID}&scope=identify+guilds&response_type=code&redirect_uri=${REDIRECT_URL}`;
 const EVENT_ORIGIN = document.location.origin;
 
