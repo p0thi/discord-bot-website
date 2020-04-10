@@ -423,19 +423,6 @@ export default {
       }
       let sounds = this.activeGuild.sounds;
 
-      sounds = sounds.concat(
-        sounds,
-        sounds,
-        sounds,
-        sounds,
-        sounds,
-        sounds,
-        sounds,
-        sounds,
-        sounds,
-        sounds
-      );
-
       let result = sounds;
       // console.log("array", result);
       // console.log("length", result.length);
