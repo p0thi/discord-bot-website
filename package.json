@@ -6,8 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:build": "vue-cli-service electron:build",
-    "electron:serve": "vue-cli-service electron:serve",
+    "electron:build": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:build",
+    "electron:serve": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:serve",
     "lint:fix": "vue-cli-service lint --fix",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
@@ -17,13 +17,16 @@
     "axios": "^0.19.2",
     "color-thief": "null2/color-thief",
     "core-js": "^3.6.4",
+    "electron-settings": "^3.2.0",
     "get-image-colors": "^2.0.0",
+    "keycodemap": "^1.4.7",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5",
     "vuetify": "^2.2.11",
     "vuetify-confirm": "^2.0.2",
     "vuetify-toast-snackbar": "^0.6.1",
-    "vuex": "^3.1.2"
+    "vuex": "^3.1.2",
+    "vuex-electron": "^1.0.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.2.0",
@@ -31,6 +34,7 @@
     "@vue/cli-service": "^4.2.0",
     "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.0.3",
+    "cross-env": "^7.0.2",
     "electron": "^6.0.0",
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.1",
