@@ -21,9 +21,9 @@
           <v-avatar size="35" class="mr-3">
             <v-img :src="user.displayAvatarURL"></v-img>
           </v-avatar>
-          <span v-if="$vuetify.breakpoint.smAndUp" class="title">{{
-            user.username
-          }}</span>
+          <span v-if="$vuetify.breakpoint.smAndUp" class="title">
+            {{ user.username }}
+          </span>
           <span v-if="$vuetify.breakpoint.smAndUp" class="body-1"
             >#{{ user.discriminator }}</span
           >
@@ -61,6 +61,41 @@
     </v-app-bar>
 
     <v-content>
+      <v-banner
+        v-if="!isWebsite"
+        v-model="updating"
+        class="white--text"
+        color="secondary"
+      >
+        <span v-if="!updateProgress">Update gefunden. Wird vorbereitet...</span>
+        <div v-else-if="!updateFinished">
+          <v-row style="width: 95vw">
+            <!-- <v-col class="align-self-center" cols="1">{{updateProgress.percent}}%</v-col> -->
+            <v-col class="align-self-center">
+              <v-progress-linear :value="updateProgress.percent" height="15">
+                <template v-slot="{ value }">
+                  <strong class="body-2 white--text"
+                    >{{ Math.ceil(value) }}%</strong
+                  >
+                </template>
+              </v-progress-linear>
+            </v-col>
+            <v-col class="align-self-center" cols="2">
+              <span class="subtitle-1 font-weight-black"
+                >{{
+                  (updateProgress.bytesPerSecond / 1048576).toFixed(2)
+                }}
+                Mb/s</span
+              >
+            </v-col>
+          </v-row>
+        </div>
+        <span v-else>Update abgeschlossen</span>
+        <template v-if="updateFinished" v-slot:actions="{ dismiss }">
+          <v-btn text color="white" @click="restartApp">Neu starten</v-btn>
+          <v-btn text color="white" @click="dismiss">Später neu starten</v-btn>
+        </template>
+      </v-banner>
       <v-container :fluid="$vuetify.breakpoint.mdAndDown">
         <router-view></router-view>
       </v-container>
@@ -70,12 +105,44 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+let ipcRenderer;
+if (process.env.VUE_APP_ELECTRON_ENV) {
+  ipcRenderer = require("electron").ipcRenderer;
+}
 
 export default {
   name: "App",
   created() {
     this.fetchUser();
+    if (process.env.VUE_APP_ELECTRON_ENV) {
+      ipcRenderer.on("checking-for-update", () => {});
+      ipcRenderer.on("update-available", () => {
+        this.updating = true;
+      });
+      ipcRenderer.on("update-not-available", () => {
+        this.updating = false;
+      });
+      ipcRenderer.on("update-error", () => {
+        this.updating = false;
+      });
+      ipcRenderer.on("update-download-progress", (event, data) => {
+        this.updateProgress = data;
+      });
+      ipcRenderer.on("update-downloaded", () => {
+        this.updateFinished = true;
+      });
+    }
   },
+  ...(process.env.VUE_APP_ELECTRON_ENV && {
+    beforeDestroy() {
+      ipcRenderer.removeAllListeners("checking-for-update");
+      ipcRenderer.removeAllListeners("update-available");
+      ipcRenderer.removeAllListeners("update-not-available");
+      ipcRenderer.removeAllListeners("update-error");
+      ipcRenderer.removeAllListeners("update-download-progress");
+      ipcRenderer.removeAllListeners("update-downloaded");
+    }
+  }),
   components: {},
   computed: {
     ...mapGetters(["isLoggedIn", "authStatus", "user"]),
@@ -84,10 +151,20 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["login", "logout", "fetchUser"])
+    ...mapActions(["login", "logout", "fetchUser"]),
+    ...(process.env.VUE_APP_ELECTRON_ENV && {
+      restartApp() {
+        ipcRenderer.send("restart-app");
+      }
+    })
   },
   data: () => ({
-    //
+    ...(process.env.VUE_APP_ELECTRON_ENV && {
+      updating: false,
+      updateProgress: undefined,
+      updateFinished: false
+    }),
+    isWebsite: !process.env.VUE_APP_ELECTRON_ENV
   })
 };
 </script>

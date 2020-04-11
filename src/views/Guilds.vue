@@ -242,7 +242,7 @@
               cols="12"
               sm="6"
               md="4"
-              xl="3"
+              lg="3"
             >
               <sound-list-tile
                 @joinValueChanged="soundJoinValueChanged(sound, $event)"

@@ -15,16 +15,20 @@ module.exports = {
       builderOptions: {
         appId: "de.glowtrap.bot",
         productName: "Pothi-Bot Manager",
+        nsis: {
+          oneClick: false,
+          perMachine: true
+        },
         win: {
-          icon: "./public/logo_round.png",
-          target: ["portable", "nsis"]
+          icon: "public/logo_round.png",
+          target: ["nsis"]
         },
         mac: {
-          icon: "./public/logo_round.png",
+          icon: "public/logo_round.png",
           target: ["dmg"]
         },
         linux: {
-          icon: "./public/logo_round.png",
+          icon: "public/logo_round.png",
           target: ["AppImage"]
         },
         publish: [

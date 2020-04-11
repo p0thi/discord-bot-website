@@ -1,12 +1,12 @@
 {
   "name": "discord-bot-website",
-  "version": "0.1.0",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:release": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:build --win --linux -p onTagOrDraft",
+    "electron:release": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:build --win --linux -p always",
     "electron:build": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:build --linux",
     "electron:serve": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:serve",
     "lint:fix": "vue-cli-service lint --fix",

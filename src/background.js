@@ -13,7 +13,7 @@ import {
   createProtocol,
   installVueDevtools
 } from "vue-cli-plugin-electron-builder/lib";
-// import { autoUpdater } from "electron-updater";
+import { autoUpdater } from "electron-updater";
 const nodeUrl = require("url");
 const store = require("electron-settings");
 const path = require("path");
@@ -21,10 +21,12 @@ const path = require("path");
 const icon = path.join(__static, "logo-round.png");
 /*eslint-enable */
 
-Menu.setApplicationMenu(null);
-
 const isDevelopment = process.env.NODE_ENV !== "production";
 let appTray;
+
+ipcMain.on("restart-app", () => {
+  autoUpdater.quitAndInstall(true, true);
+});
 
 ipcMain.on("get-hotkeys", (event, data) => {
   let result = {};
@@ -357,8 +359,12 @@ app.on("ready", async () => {
     } catch (e) {
       console.error("Vue Devtools failed to install:", e.toString());
     }
+  } else {
+    Menu.setApplicationMenu(null);
   }
+
   createWindow();
+  autoUpdater.checkForUpdates();
 });
 
 // Exit cleanly on request from parent process in development mode.
@@ -374,4 +380,42 @@ if (isDevelopment) {
       app.quit();
     });
   }
+}
+
+try {
+  autoUpdater.on("checking-for-update", () => {
+    console.log("checking for updates", win);
+    win.webContents.send("checking-for-update");
+  });
+  autoUpdater.on("update-available", () => {
+    console.log("update available"), win;
+    win.webContents.send("update-available");
+  });
+  autoUpdater.on("update-not-available", () => {
+    console.log("no update available", win);
+    win.webContents.send("update-not-available");
+
+    // mainWindow.webContents.send('update', {message: 'update'});
+    // mainWindow.webContents.send('update', {message: 'progress', progress: {
+    //     percent: 50,
+    //     bytesPerSecond: 2000000
+    //   }});
+  });
+  autoUpdater.on("error", err => {
+    console.log("update error");
+    console.error(err);
+    win.webContents.send("update-error");
+  });
+  autoUpdater.on("download-progress", progressObj => {
+    console.log("update progress: " + progressObj.percent);
+    win.webContents.send("update-download-progress", progressObj);
+  });
+  autoUpdater.on("update-downloaded", () => {
+    console.log("update downloaded");
+    autoUpdater.quitAndInstall(true, true);
+    win.webContents.send("update-downloaded");
+  });
+} catch (e) {
+  // Catch Error
+  // throw e;
 }
