@@ -16,11 +16,24 @@ module.exports = {
         appId: "de.glowtrap.bot",
         productName: "Pothi-Bot Manager",
         win: {
-          icon: "./public/logo_round.png"
+          icon: "./public/logo_round.png",
+          target: ["portable", "nsis"]
+        },
+        mac: {
+          icon: "./public/logo_round.png",
+          target: ["dmg"]
         },
         linux: {
-          icons: "./public/logo_round.png"
-        }
+          icon: "./public/logo_round.png",
+          target: ["AppImage"]
+        },
+        publish: [
+          {
+            provider: "github",
+            owner: "p0thi",
+            repo: "discord-bot-manager"
+          }
+        ]
       }
     }
   }

@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:build": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:build",
+    "electron:build": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:build --win --linux",
     "electron:serve": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:serve",
     "lint:fix": "vue-cli-service lint --fix",
     "postinstall": "electron-builder install-app-deps",
