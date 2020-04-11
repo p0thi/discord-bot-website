@@ -21,6 +21,8 @@ const path = require("path");
 const icon = path.join(__static, "logo-round.png");
 /*eslint-enable */
 
+Menu.setApplicationMenu(null);
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 let appTray;
 
@@ -355,8 +357,6 @@ app.on("ready", async () => {
     } catch (e) {
       console.error("Vue Devtools failed to install:", e.toString());
     }
-  } else {
-    Menu.setApplicationMenu(null);
   }
   createWindow();
 });
