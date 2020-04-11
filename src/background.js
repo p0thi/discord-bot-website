@@ -20,13 +20,9 @@ const path = require("path");
 /*eslint-disable */
 const icon = path.join(__static, "logo-round.png");
 /*eslint-enable */
-Menu.setApplicationMenu(null);
 
 const isDevelopment = process.env.NODE_ENV !== "production";
-
-app.on("browser-window-created", function(e, window) {
-  window.setMenu(null);
-});
+let appTray;
 
 ipcMain.on("get-hotkeys", (event, data) => {
   let result = {};
@@ -181,6 +177,7 @@ function auth(event, uri) {
   //   '?response_type=code&client_id=185542328218288128' +
   //   '&redirect_uri=http://localhost/callback&scope=email%20identify&state=baum';
   if (!authWindow) {
+    console.log("url", uri);
     authWindow = new BrowserWindow({
       width: 500,
       height: 800,
@@ -264,11 +261,14 @@ function createWindow() {
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol("app");
+    Menu.setApplicationMenu(null);
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
   }
   console.log("icon", icon);
-  const appTray = new Tray(icon);
+  if (!appTray) {
+    appTray = new Tray(icon);
+  }
 
   const contextMenu = Menu.buildFromTemplate([
     {
