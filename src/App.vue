@@ -10,7 +10,7 @@
           transition="scale-transition"
           width="40"
         />
-        <h1>Pothi-Bot</h1>
+        <h1 :class="{ title: $vuetify.breakpoint.smAndDown }">Pothi-Bot</h1>
       </div>
 
       <v-spacer></v-spacer>
@@ -21,9 +21,18 @@
           <v-avatar size="35" class="mr-3">
             <v-img :src="user.displayAvatarURL"></v-img>
           </v-avatar>
-          <span class="title">{{ user.username }}</span>
-          <span class="body-1">#{{ user.discriminator }}</span>
-          <v-divider class="mx-4" inset vertical></v-divider>
+          <span v-if="$vuetify.breakpoint.smAndUp" class="title">{{
+            user.username
+          }}</span>
+          <span v-if="$vuetify.breakpoint.smAndUp" class="body-1"
+            >#{{ user.discriminator }}</span
+          >
+          <v-divider
+            v-if="$vuetify.breakpoint.smAndUp"
+            class="mx-4"
+            inset
+            vertical
+          ></v-divider>
           <v-btn @click="logout" text>
             <span class="mr-2">Logout</span>
             <v-icon>mdi-logout</v-icon>

@@ -31,7 +31,7 @@ module.exports = {
           {
             provider: "github",
             owner: "p0thi",
-            repo: "discord-bot-manager"
+            repo: "discord-bot-website"
           }
         ]
       }

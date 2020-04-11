@@ -23,9 +23,10 @@
             >
               <v-card
                 @click="toggle"
-                class="ma-3"
-                :style="active ? 'border: 2px solid orange' : ''"
+                class="ma-3 mb-5"
+                :style="active ? 'border: 2px solid orange;' : ''"
                 :color="getPalette(guild.id).first"
+                :elevation="active ? 9 : 2"
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
@@ -44,12 +45,8 @@
                       </div>
                     </v-card-subtitle>
                   </div>
-                  <v-avatar
-                    class="ma-3"
-                    :size="guild !== activeGuild ? '75' : '85'"
-                  >
+                  <v-avatar class="ma-3" size="75">
                     <v-img
-                      @load="savePalette(guild)"
                       v-if="guild.icon"
                       :ref="`img-${guild.id}`"
                       :src="guild.icon"
@@ -279,10 +276,10 @@
 </template>
 <script>
 import { mapGetters, mapActions } from "vuex";
-// import getColors from "get-image-colors";
+import getColors from "get-image-colors";
 import chroma from "chroma-js";
 import axios from "axios";
-import * as Vibrant from "node-vibrant";
+// import * as Vibrant from "node-vibrant";
 
 import SoundListTile from "../components/SoundListTile";
 
@@ -360,34 +357,43 @@ export default {
           if (!guild.icon) {
             continue;
           }
-          // this.savePalette(guild);
-          // this.savePalette(guild).then(colors => {
-          //   const vibrant = colors.Vibrant
-          //   let secondColor;
-          //   let currentDiff = -1;
-          //   for (const color in colors) {
-          //     if (color === 'Vibrant') {
-          //       continue;
-          //     }
-          //     const diff = chroma.contrast(vibrant.hex, colors[color].hex)
-          //     console.log(color, diff)
+          getColors(guild.icon).then(colors => {
+            console.log("colors", colors);
+            let first = chroma(
+              colors[0]._rgb[0],
+              colors[0]._rgb[1],
+              colors[0]._rgb[2]
+            );
+            console.log("first", first);
+            let second;
+            let distance = 0;
 
-          //     if (diff > currentDiff) {
-          //       currentDiff = diff;
-          //       secondColor = colors[color]
-          //     }
-          //   }
-          //   console.log('title', colors.Vibrant.getBodyTextColor());
+            for (const x of colors) {
+              const xChroma = chroma(x._rgb[0], x._rgb[1], x._rgb[2]);
+              const contrast = chroma.contrast(first.hex(), xChroma.hex());
+              console.log("contrast", contrast);
+              if (contrast > distance && contrast >= 2) {
+                second = xChroma;
+                distance = contrast;
+              }
+            }
 
-          //   const first = chroma(vibrant.hex);
-          //   const second = chroma(secondColor.hex)
+            if (!second) {
+              first = chroma("black");
+              second = chroma("white");
+            } else if (first.luminance() > second.luminance()) {
+              const tmp = first;
+              first = second;
+              second = tmp;
+            }
 
-          //   this.$set(this.guildColors, guild.id, {
-          //     first: first.hex(),
-          //     second: second.hex(),
-          //     darkFirst: first.darken().hex()
-          //   });
-          // });
+            this.$set(this.guildColors, guild.id, {
+              first: first.hex(),
+              second: second.hex(),
+              darkFirst: first.darken().hex()
+            });
+            // tmpColors[guild.id] = { first, second };
+          });
         }
       }
     }
@@ -520,43 +526,6 @@ export default {
           );
         });
       console.log(this.addSoundFormData.file);
-    },
-    savePalette(guild) {
-      console.log("savePalette", guild.name);
-      if (!guild || !guild.icon) {
-        return;
-      }
-      const img = guild.icon; //this.$refs[`img-${guild.id}`][0].image;
-      let v = new Vibrant(img, {
-        colorCount: 256
-      });
-      v.getPalette().then(colors => {
-        const vibrant = colors.Vibrant;
-        let secondColor;
-        let currentDiff = -1;
-        for (const color in colors) {
-          if (color === "Vibrant") {
-            continue;
-          }
-          const diff = chroma.contrast(vibrant.hex, colors[color].hex);
-          console.log(color, diff);
-
-          if (diff > currentDiff) {
-            currentDiff = diff;
-            secondColor = colors[color];
-          }
-        }
-        console.log("title", colors.Vibrant.getBodyTextColor());
-
-        const first = chroma(vibrant.hex);
-        const second = chroma(secondColor.hex);
-
-        this.$set(this.guildColors, guild.id, {
-          first: first.hex(),
-          second: second.hex(),
-          darkFirst: first.darken().hex()
-        });
-      });
     }
   },
   computed: {

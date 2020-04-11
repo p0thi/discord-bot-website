@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-row>
-      <v-col v-if="isWebsite">
+      <v-col v-if="isWebsite" md="6">
         <v-card>
-          <v-card-title class="display-1 text-center">
+          <v-card-title class="title">
             <span class="mr-5">Bot jetzt zu discord Server hinzufügen</span>
             <v-btn
               href="https://discordapp.com/oauth2/authorize?client_id=185547264838598656&scope=bot&permissions=36830272"
@@ -12,7 +12,30 @@
               color="primary"
             >
               <v-icon>mdi-discord</v-icon>
-              <span class="mx-2">Hinzufügen</span>
+              <span class="mx-2"
+                ><span v-if="$vuetify.breakpoint.smAndUp"
+                  >Zu meinem Server </span
+                >Hinzufügen</span
+              >
+              <v-icon>mdi-open-in-new</v-icon>
+            </v-btn>
+          </v-card-title>
+        </v-card>
+      </v-col>
+      <v-col v-if="isWebsite" md="6">
+        <v-card>
+          <v-card-title class="title">
+            <span
+              >Jetzt Desktop Software mit Hotkey Funktion herunterladen</span
+            >
+            <v-btn
+              href="https://github.com/p0thi/discord-bot-website/releases"
+              target="_blank"
+              large
+              color="secondary"
+            >
+              <v-icon>mdi-download-outline</v-icon>
+              <span class="mx-2">Software Herunterladen</span>
               <v-icon>mdi-open-in-new</v-icon>
             </v-btn>
           </v-card-title>
@@ -20,7 +43,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
+      <v-col lg="6">
         <v-card>
           <v-card-title>Befehle im Server-Chat</v-card-title>
           <v-card-text>
@@ -101,7 +124,7 @@
           </v-list-item>
         </v-card>
       </v-col>
-      <v-col>
+      <v-col lg="6">
         <v-card>
           <v-card-title>Befehle per DM an den Bot</v-card-title>
           <v-card-text>
@@ -179,3 +202,4 @@ export default {
   }
 };
 </script>
+<style lang="scss"></style>
