@@ -179,6 +179,7 @@ function auth(event, uri) {
   if (!authWindow) {
     console.log("url", uri);
     authWindow = new BrowserWindow({
+      icon,
       width: 500,
       height: 800,
       show: false,
@@ -246,13 +247,18 @@ protocol.registerSchemesAsPrivileged([
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
+    icon,
+    title: "Pothi-Bot Manager",
     width: 1200,
     height: 800,
     center: true,
-    icon,
     webPreferences: {
       nodeIntegration: true
     }
+  });
+
+  win.on("page-title-updated", e => {
+    e.preventDefault();
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {

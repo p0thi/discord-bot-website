@@ -9,5 +9,19 @@ module.exports = {
         }
       ]
     }
+  },
+  pluginOptions: {
+    electronBuilder: {
+      builderOptions: {
+        appId: "de.glowtrap.bot",
+        productName: "Pothi-Bot Manager",
+        win: {
+          icon: "./public/logo_round.png"
+        },
+        linux: {
+          icons: "./public/logo_round.png"
+        }
+      }
+    }
   }
 };

@@ -10,8 +10,7 @@
     "electron:serve": "cross-env VUE_APP_ELECTRON_ENV=true vue-cli-service electron:serve",
     "lint:fix": "vue-cli-service lint --fix",
     "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps",
-    "mwl": "cross-env VUE_APP_ELECTRON_ENV=true electron-builder -mwl"
+    "postuninstall": "electron-builder install-app-deps"
   },
   "main": "background.js",
   "dependencies": {
