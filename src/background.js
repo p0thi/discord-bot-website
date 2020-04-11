@@ -267,7 +267,6 @@ function createWindow() {
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol("app");
-    Menu.setApplicationMenu(null);
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
   }
@@ -356,6 +355,8 @@ app.on("ready", async () => {
     } catch (e) {
       console.error("Vue Devtools failed to install:", e.toString());
     }
+  } else {
+    Menu.setApplicationMenu(null);
   }
   createWindow();
 });

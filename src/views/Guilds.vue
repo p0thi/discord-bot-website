@@ -293,9 +293,7 @@ export default {
     "sound-list-tile": SoundListTile
   },
   created() {
-    console.log("guilds", this.guilds.length);
     if (!this.guilds || this.guilds.length === 0) {
-      console.log("fetching guilds");
       this.reload();
       // this.addSoundHotkeys(this.activeGuild.sounds)
       let lastGuild;
@@ -323,9 +321,6 @@ export default {
 
           let remove = fromSounds.filter(x => !toSounds.includes(x));
           let add = toSounds.filter(x => !fromSounds.includes(x));
-
-          console.log("remove:", remove.length);
-          console.log("add:", add.length);
 
           this.removeSoundHotkeys(remove);
           this.addSoundHotkeys(add);
@@ -358,20 +353,17 @@ export default {
             continue;
           }
           getColors(guild.icon).then(colors => {
-            console.log("colors", colors);
             let first = chroma(
               colors[0]._rgb[0],
               colors[0]._rgb[1],
               colors[0]._rgb[2]
             );
-            console.log("first", first);
             let second;
             let distance = 0;
 
             for (const x of colors) {
               const xChroma = chroma(x._rgb[0], x._rgb[1], x._rgb[2]);
               const contrast = chroma.contrast(first.hex(), xChroma.hex());
-              console.log("contrast", contrast);
               if (contrast > distance && contrast >= 2) {
                 second = xChroma;
                 distance = contrast;
@@ -404,7 +396,6 @@ export default {
       addSoundHotkeys(add) {
         add.forEach(x => {
           ipcRenderer.on(`shortcut-triggered-${x.id}`, async (event, sound) => {
-            console.log("play sound");
             axios
               .all(
                 axios.get(
@@ -451,7 +442,6 @@ export default {
       },
       removeSoundHotkeys(remove) {
         remove.forEach(x => {
-          console.log("removing handler");
           ipcRenderer.removeAllListeners(`shortcut-triggered-${x.id}`);
           ipcRenderer.send("remove-sound-listener", x);
         });
@@ -471,7 +461,6 @@ export default {
       }
     },
     soundJoinValueChanged(sound, newVal) {
-      console.log(`${sound.command} - ${newVal}`);
       if (newVal) {
         this.$set(this.activeGuild, "joinSound", sound.id);
       } else {
@@ -520,12 +509,10 @@ export default {
           this.$refs.addSoundForm.reset();
         })
         .catch(e => {
-          console.log("error", JSON.stringify(e.response.data.message));
           this.$toast.error(
             `Befehl konnte nicht gespeichert werden: <b>${e.response.data.message}</b>`
           );
         });
-      console.log(this.addSoundFormData.file);
     }
   },
   computed: {

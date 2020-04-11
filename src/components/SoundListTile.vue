@@ -130,7 +130,6 @@ export default {
             new Promise((resolve, reject) => {
               import("electron")
                 .then(electron => {
-                  console.log("electron imported");
                   const ipcRenderer = electron.ipcRenderer;
                   ipcRenderer.once(
                     `store-hotkey-response-${this.sound.id}`,
@@ -152,14 +151,12 @@ export default {
                   ipcRenderer.send("store-hotkey", register);
                 })
                 .catch(() => reject());
-            })
-              .then(data => console.log("data", data))
-              .catch(e => console.log(e));
+            }).catch(e => console.log(e));
           }
         );
       },
       deleteHotkey() {
-        console.log("deleting hotkey for", this.sound.command);
+        // console.log("deleting hotkey for", this.sound.command);
         ipcRenderer.send("delete-hotkey", this.sound);
       }
     }),
