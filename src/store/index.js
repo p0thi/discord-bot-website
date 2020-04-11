@@ -102,7 +102,7 @@ const store = new Vuex.Store({
           console.log("source", source);
         }
         axios
-          .get("/api/guilds/all")
+          .get(`${process.env.VUE_APP_API_BASE_URL}/api/guilds/all`)
           .then(resp => {
             console.log(resp);
             commit("guilds", resp.data);
@@ -117,7 +117,7 @@ const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         console.log();
         axios
-          .get("/api/user/self")
+          .get(`${process.env.VUE_APP_API_BASE_URL}/api/user/self`)
           .then(resp => {
             commit("setUser", resp.data);
             console.log("user fetched", resp.data);

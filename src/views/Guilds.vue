@@ -1,21 +1,74 @@
 <template>
   <v-row>
-    <v-col cols="3">
+    <v-col cols="12">
       <v-card outlined>
-        <v-card-title>Server</v-card-title>
+        <v-card-title>Server auswählen</v-card-title>
         <v-card-text>
-          <v-row dense>
+          <v-col v-if="!guilds || guilds.length === 0">
+            <span v-if="fetchingGuilds">
+              Lädt...
+              <v-progress-linear
+                indeterminate
+                color="primary"
+              ></v-progress-linear>
+            </span>
+            <span v-else>Kein Server geladen oder vorhanden</span>
+          </v-col>
+          <v-slide-group v-else v-model="slide" show-arrows mandatory>
+            <v-slide-item
+              v-for="guild in guilds"
+              :key="guild.id"
+              v-slot:default="{ active, toggle }"
+              :value="guild.id"
+            >
+              <v-card
+                @click="toggle"
+                class="ma-3"
+                :style="active ? 'border: 2px solid orange' : ''"
+                :color="getPalette(guild.id).first"
+              >
+                <div class="d-flex flex-no-wrap justify-space-around">
+                  <div :style="{ color: getPalette(guild.id).second }">
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
+                    <v-card-subtitle
+                      :style="{ color: getPalette(guild.id).second }"
+                    >
+                      <div>{{ guild.sounds.length }} Sounds verfügbar</div>
+                      <div class="body-2 font-weight-thin">
+                        <span>Kommando-Symbol:</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
+                      </div>
+                    </v-card-subtitle>
+                  </div>
+                  <v-avatar
+                    class="ma-3"
+                    :size="guild !== activeGuild ? '75' : '85'"
+                  >
+                    <v-img
+                      @load="savePalette(guild)"
+                      v-if="guild.icon"
+                      :ref="`img-${guild.id}`"
+                      :src="guild.icon"
+                    ></v-img>
+                  </v-avatar>
+                </div>
+              </v-card>
+            </v-slide-item>
+          </v-slide-group>
+
+          <!-- <v-row>
             <v-col v-if="!guilds || guilds.length === 0">
               <span v-if="fetchingGuilds">
                 Lädt...
-                <v-progress-linear
-                  indeterminate
-                  color="primary"
-                ></v-progress-linear>
+                <v-progress-linear indeterminate color="primary"></v-progress-linear>
               </span>
               <span v-else>Kein Server geladen oder vorhanden</span>
             </v-col>
-            <v-col v-else cols="12">
+            <v-col v-else cols="12" :md="3">
               <v-card
                 v-for="guild in guilds"
                 :key="guild.id"
@@ -30,39 +83,30 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
-                    <v-card-subtitle
-                      :style="{ color: getPalette(guild.id).second }"
-                    >
+                    <v-card-title class="headline">{{ guild.name }}</v-card-title>
+                    <v-card-subtitle :style="{ color: getPalette(guild.id).second }">
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">{{
+                        <span class="font-weight-bold">
+                          {{
                           guild.commandPrefix
-                        }}</span>
+                          }}
+                        </span>
                       </div>
                     </v-card-subtitle>
                   </div>
-                  <v-avatar
-                    class="ma-3"
-                    :size="guild !== activeGuild ? '75' : '85'"
-                  >
-                    <v-img
-                      v-if="guild.icon"
-                      :ref="`img-${guild.id}`"
-                      :src="guild.icon"
-                    ></v-img>
+                  <v-avatar class="ma-3" :size="guild !== activeGuild ? '75' : '85'">
+                    <v-img v-if="guild.icon" :ref="`img-${guild.id}`" :src="guild.icon"></v-img>
                   </v-avatar>
                 </div>
               </v-card>
             </v-col>
-          </v-row>
+          </v-row>-->
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col v-if="activeGuild" cols="9">
+    <v-col v-if="activeGuild" cols="12">
       <v-card outlined>
         <v-card-title>
           <span>
@@ -72,14 +116,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -198,10 +242,14 @@
             <v-col
               v-for="(sound, i) in getPaginatedSounds"
               :key="sound.id + i"
-              cols="3"
+              cols="12"
+              sm="6"
+              md="4"
+              xl="3"
             >
               <sound-list-tile
                 @joinValueChanged="soundJoinValueChanged(sound, $event)"
+                @recordingState="recordingStateChange"
                 :commandPrefix="activeGuild.commandPrefix"
                 :sound="sound"
                 :guildId="activeGuild.id"
@@ -231,11 +279,17 @@
 </template>
 <script>
 import { mapGetters, mapActions } from "vuex";
-import getColors from "get-image-colors";
+// import getColors from "get-image-colors";
 import chroma from "chroma-js";
 import axios from "axios";
+import * as Vibrant from "node-vibrant";
 
 import SoundListTile from "../components/SoundListTile";
+
+let ipcRenderer;
+if (process.env.VUE_APP_ELECTRON_ENV) {
+  ipcRenderer = require("electron").ipcRenderer;
+}
 
 export default {
   components: {
@@ -246,16 +300,27 @@ export default {
     if (!this.guilds || this.guilds.length === 0) {
       console.log("fetching guilds");
       this.reload();
+      // this.addSoundHotkeys(this.activeGuild.sounds)
+      let lastGuild;
+      if (process.env.VUE_APP_ELECTRON_ENV) {
+        lastGuild = ipcRenderer.sendSync("get-last-selected-guild");
+      }
+      if (lastGuild) {
+        this.slide = lastGuild;
+      }
     }
   },
+  ...(process.env.VUE_APP_ELECTRON_ENV && {
+    beforeDestroy() {
+      // this.removeSoundHotkeys(this.activeGuild.sounds)
+    }
+  }),
   watch: {
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       activeGuild: {
         immediate: true,
         deep: true,
         handler(to, from) {
-          const ipcRenderer = require("electron").ipcRenderer;
-
           const toSounds = to && to.sounds ? to.sounds : [];
           const fromSounds = from && from.sounds ? from.sounds : [];
 
@@ -265,8 +330,8 @@ export default {
           console.log("remove:", remove.length);
           console.log("add:", add.length);
 
-          remove.forEach(x => ipcRenderer.send("remove-sound", x));
-          add.forEach(x => ipcRenderer.send("add-sound", x));
+          this.removeSoundHotkeys(remove);
+          this.addSoundHotkeys(add);
         }
       }
     }),
@@ -274,11 +339,14 @@ export default {
       immediate: true,
       handler(to) {
         this.activeGuild = { id: to.query.guild };
+        if (process.env.VUE_APP_ELECTRON_ENV) {
+          ipcRenderer.send("last-selected-guild", to.query.guild);
+        }
       }
     },
     paginationLength(to) {
       if (to < this.currentSoundPage) {
-        this.currentSoundPage = to;
+        this.currentSoundPage = Math.max(1, to);
       }
     },
     guilds: {
@@ -292,43 +360,109 @@ export default {
           if (!guild.icon) {
             continue;
           }
-          getColors(guild.icon).then(colors => {
-            let first = colors[0];
-            let second;
-            let distance = 0;
+          // this.savePalette(guild);
+          // this.savePalette(guild).then(colors => {
+          //   const vibrant = colors.Vibrant
+          //   let secondColor;
+          //   let currentDiff = -1;
+          //   for (const color in colors) {
+          //     if (color === 'Vibrant') {
+          //       continue;
+          //     }
+          //     const diff = chroma.contrast(vibrant.hex, colors[color].hex)
+          //     console.log(color, diff)
 
-            for (const x of colors) {
-              const contrast = chroma.contrast(first, x);
-              if (contrast > distance && contrast >= 2) {
-                second = x;
-                distance = contrast;
-              }
-            }
+          //     if (diff > currentDiff) {
+          //       currentDiff = diff;
+          //       secondColor = colors[color]
+          //     }
+          //   }
+          //   console.log('title', colors.Vibrant.getBodyTextColor());
 
-            if (!second) {
-              first = chroma("black");
-              second = chroma("white");
-            }
+          //   const first = chroma(vibrant.hex);
+          //   const second = chroma(secondColor.hex)
 
-            // this.guildColors.baum = { first, second };
-            this.$set(this.guildColors, guild.id, {
-              first: first.hex(),
-              second: second.hex(),
-              darkFirst: first.darken().hex()
-            });
-            // tmpColors[guild.id] = { first, second };
-          });
+          //   this.$set(this.guildColors, guild.id, {
+          //     first: first.hex(),
+          //     second: second.hex(),
+          //     darkFirst: first.darken().hex()
+          //   });
+          // });
         }
       }
     }
   },
   methods: {
     ...mapActions(["fetchGuilds"]),
+    ...(process.env.VUE_APP_ELECTRON_ENV && {
+      addSoundHotkeys(add) {
+        add.forEach(x => {
+          ipcRenderer.on(`shortcut-triggered-${x.id}`, async (event, sound) => {
+            console.log("play sound");
+            axios
+              .all(
+                axios.get(
+                  `${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`,
+                  {
+                    params: {
+                      id: sound.id,
+                      block: false
+                    },
+                    timeout: 40000
+                  }
+                )
+              )
+              .catch(e => {
+                if (e.response) {
+                  switch (e.response.status) {
+                    case 429:
+                      this.$toast.error(
+                        "Du musst kurz warten, bevor du weitere Befehle senden kannst",
+                        {
+                          dismissable: true,
+                          queueable: true
+                        }
+                      );
+                      break;
+                    case 409:
+                      this.$toast.error(
+                        "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
+                        {
+                          dismissable: true,
+                          queueable: true
+                        }
+                      );
+                      break;
+                  }
+                }
+              })
+              .then(e => {
+                console.log("sound played", e);
+              });
+          });
+          ipcRenderer.send("add-sound-listener", x);
+        });
+      },
+      removeSoundHotkeys(remove) {
+        remove.forEach(x => {
+          console.log("removing handler");
+          ipcRenderer.removeAllListeners(`shortcut-triggered-${x.id}`);
+          ipcRenderer.send("remove-sound-listener", x);
+        });
+      }
+    }),
     reload() {
       this.fetchingGuilds = true;
       this.fetchGuilds().finally(() => {
         this.fetchingGuilds = false;
       });
+    },
+    recordingStateChange(value) {
+      if (value) {
+        ipcRenderer.send("unlisten-all-sounds");
+      } else {
+        ipcRenderer.send("listen-all-sounds", this.activeGuild.sounds);
+      }
     },
     soundJoinValueChanged(sound, newVal) {
       console.log(`${sound.command} - ${newVal}`);
@@ -386,6 +520,43 @@ export default {
           );
         });
       console.log(this.addSoundFormData.file);
+    },
+    savePalette(guild) {
+      console.log("savePalette", guild.name);
+      if (!guild || !guild.icon) {
+        return;
+      }
+      const img = guild.icon; //this.$refs[`img-${guild.id}`][0].image;
+      let v = new Vibrant(img, {
+        colorCount: 256
+      });
+      v.getPalette().then(colors => {
+        const vibrant = colors.Vibrant;
+        let secondColor;
+        let currentDiff = -1;
+        for (const color in colors) {
+          if (color === "Vibrant") {
+            continue;
+          }
+          const diff = chroma.contrast(vibrant.hex, colors[color].hex);
+          console.log(color, diff);
+
+          if (diff > currentDiff) {
+            currentDiff = diff;
+            secondColor = colors[color];
+          }
+        }
+        console.log("title", colors.Vibrant.getBodyTextColor());
+
+        const first = chroma(vibrant.hex);
+        const second = chroma(secondColor.hex);
+
+        this.$set(this.guildColors, guild.id, {
+          first: first.hex(),
+          second: second.hex(),
+          darkFirst: first.darken().hex()
+        });
+      });
     }
   },
   computed: {
@@ -394,7 +565,7 @@ export default {
       get() {
         for (const guild of this.guilds) {
           // if (guild.id === this.activeGuildId) {
-          if (guild.id === this.$route.query.guild) {
+          if (guild.id === this.slide) {
             return guild;
           }
         }
@@ -402,9 +573,17 @@ export default {
       },
       set(value) {
         if (value && value.id) {
-          this.$router.push({ query: { guild: value.id } }).catch(() => {});
+          this.slide = value.id;
         }
         // this.activeGuildId = value ? value.id : undefined;
+      }
+    },
+    slide: {
+      get() {
+        return this.$route.query.guild || this.guilds[0].id;
+      },
+      set(value) {
+        this.$router.push({ query: { guild: value } }).catch(() => {});
       }
     },
     activeGuildCommands() {
@@ -464,6 +643,9 @@ export default {
   data() {
     return {
       baseUrl: process.env.VUE_APP_API_BASE_URL,
+
+      palettes: {},
+
       currentSoundPage: 1,
       soundsPerPage: 16,
       soundSearchString: "",

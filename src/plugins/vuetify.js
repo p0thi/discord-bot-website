@@ -25,7 +25,11 @@ Vue.use(Vuetify, {
   }
 });
 
-Vue.use(VuetifyToast);
+Vue.use(VuetifyToast, {
+  classes: ["snackbar"],
+  timeout: 5000,
+  vertical: true
+});
 
 export default new Vuetify({
   lang: {

@@ -92,6 +92,7 @@ export default class AuthHandler {
   login(code) {
     console.log("code received:", `#${code}#`);
     return new Promise((resolve, reject) => {
+      console.log("redirect:", REDIRECT_URL);
       axios
         .post(`${process.env.VUE_APP_API_BASE_URL}/api/auth/login`, {
           code,

@@ -17,3 +17,5 @@ const vue = new Vue({
 }).$mount("#app");
 
 interceptorsSetup(vue);
+
+console.log("electron:", process.env.VUE_APP_ELECTRON_ENV);

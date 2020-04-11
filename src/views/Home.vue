@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row>
-      <v-col>
+      <v-col v-if="isWebsite">
         <v-card>
           <v-card-title class="display-1 text-center">
             <span class="mr-5">Bot jetzt zu discord Server hinzufügen</span>
@@ -171,6 +171,11 @@ import { mapActions } from "vuex";
 export default {
   methods: {
     ...mapActions(["fetchGuilds"])
+  },
+  data() {
+    return {
+      isWebsite: !process.env.VUE_APP_ELECTRON_ENV
+    };
   }
 };
 </script>

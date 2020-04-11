@@ -14,6 +14,7 @@
       </div>
 
       <v-spacer></v-spacer>
+      <!-- <p>{{size}}</p> -->
 
       <span v-if="isLoggedIn">
         <v-sheet class="pa-2 mt-2">
@@ -51,7 +52,7 @@
     </v-app-bar>
 
     <v-content>
-      <v-container>
+      <v-container :fluid="$vuetify.breakpoint.mdAndDown">
         <router-view></router-view>
       </v-container>
     </v-content>
@@ -68,7 +69,10 @@ export default {
   },
   components: {},
   computed: {
-    ...mapGetters(["isLoggedIn", "authStatus", "user"])
+    ...mapGetters(["isLoggedIn", "authStatus", "user"]),
+    size() {
+      return this.$vuetify.breakpoint.name;
+    }
   },
   methods: {
     ...mapActions(["login", "logout", "fetchUser"])
@@ -82,7 +86,29 @@ export default {
 #app {
   background-color: #f5f5f5;
 }
+
+@media (min-width: 1264px) {
+  .container {
+    max-width: 1250px !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .container {
+    max-width: 950px;
+  }
+}
+
 .round-img {
   border-radius: 50%;
+}
+.snackbar {
+  .v-snack__wrapper {
+    .v-snack__content {
+      .vts__message {
+        font-size: 1.25rem;
+      }
+    }
+  }
 }
 </style>

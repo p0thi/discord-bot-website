@@ -1,3 +1,13 @@
 module.exports = {
-  transpileDependencies: ["vuetify"]
+  transpileDependencies: ["vuetify"],
+  configureWebpack: {
+    module: {
+      rules: [
+        {
+          test: /\.worker\.js$/,
+          use: { loader: "worker-loader" }
+        }
+      ]
+    }
+  }
 };
