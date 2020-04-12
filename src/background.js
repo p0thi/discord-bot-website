@@ -422,7 +422,6 @@ try {
   });
   autoUpdater.on("update-downloaded", () => {
     console.log("update downloaded");
-    autoUpdater.quitAndInstall(true, true);
     win.webContents.send("update-downloaded");
   });
 } catch (e) {

@@ -130,6 +130,7 @@ export default {
       });
       ipcRenderer.on("update-downloaded", () => {
         this.updateFinished = true;
+        this.updateProgress = {};
       });
     }
   },
