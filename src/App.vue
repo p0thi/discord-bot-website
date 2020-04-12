@@ -111,7 +111,7 @@
             v-if="updateAvailable && !updating && !updateFinished"
             text
             @click="install"
-            >Neue version installieren</v-btn
+            >Neue Version Installieren</v-btn
           >
           <v-btn
             v-if="updateAvailable && !updating && !updateFinished"
@@ -121,7 +121,7 @@
           >
 
           <v-btn v-if="updateFinished" text @click="restartApp"
-            >Neu starten</v-btn
+            >Jetzt installieren</v-btn
           >
           <v-btn v-if="updateFinished" text @click="dismiss"
             >Später neu starten</v-btn
