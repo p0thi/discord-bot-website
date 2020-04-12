@@ -40,6 +40,15 @@ ipcMain.on("restart-app", () => {
   autoUpdater.quitAndInstall(true, true);
 });
 
+ipcMain.on("download-update", () => {
+  console.log("try update");
+  try {
+    autoUpdater.downloadUpdate();
+  } catch (e) {
+    console.log(e);
+  }
+});
+
 ipcMain.on("get-hotkeys", (event, data) => {
   let result = {};
   const settings = store.get(`hotkeys.${data.id}`);
@@ -393,6 +402,7 @@ if (isDevelopment) {
 }
 
 try {
+  autoUpdater.autoDownload = false;
   autoUpdater.on("checking-for-update", () => {
     console.log("checking for updates", win);
     win.webContents.send("checking-for-update");

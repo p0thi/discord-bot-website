@@ -63,12 +63,16 @@
     <v-content>
       <v-banner
         v-if="!isWebsite"
-        v-model="updating"
-        class="white--text"
-        color="secondary"
+        v-model="updateAvailable"
+        class="primary--text"
       >
-        <span v-if="!updateProgress">Update gefunden. Wird vorbereitet...</span>
-        <div v-else-if="!updateFinished">
+        <span v-if="updateAvailable && !updating && !updateFinished"
+          >Neuere Version verfügbar</span
+        >
+
+        <span v-if="updating && !updateProgress">Wird vorbereitet...</span>
+
+        <div v-if="updateProgress && !updateFinished">
           <v-row style="width: 95vw">
             <!-- <v-col class="align-self-center" cols="1">{{updateProgress.percent}}%</v-col> -->
             <v-col class="align-self-center">
@@ -90,10 +94,38 @@
             </v-col>
           </v-row>
         </div>
-        <span v-else>Update abgeschlossen</span>
-        <template v-if="updateFinished" v-slot:actions="{ dismiss }">
-          <v-btn text color="white" @click="restartApp">Neu starten</v-btn>
-          <v-btn text color="white" @click="dismiss">Später neu starten</v-btn>
+
+        <span v-if="updateFinished">Update abgeschlossen</span>
+
+        <template
+          v-if="updateFinished || updateAvailable"
+          v-slot:actions="{ dismiss }"
+        >
+          <v-btn
+            v-if="updateAvailable && !updating && !updateFinished"
+            text
+            @click="openReleases"
+            >Manuell herunterladen</v-btn
+          >
+          <v-btn
+            v-if="updateAvailable && !updating && !updateFinished"
+            text
+            @click="install"
+            >Neue version installieren</v-btn
+          >
+          <v-btn
+            v-if="updateAvailable && !updating && !updateFinished"
+            text
+            @click="dismiss"
+            >Nicht jetzt</v-btn
+          >
+
+          <v-btn v-if="updateFinished" text @click="restartApp"
+            >Neu starten</v-btn
+          >
+          <v-btn v-if="updateFinished" text @click="dismiss"
+            >Später neu starten</v-btn
+          >
         </template>
       </v-banner>
       <v-container :fluid="$vuetify.breakpoint.mdAndDown">
@@ -105,9 +137,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-let ipcRenderer;
+let ipcRenderer, shell;
 if (process.env.VUE_APP_ELECTRON_ENV) {
-  ipcRenderer = require("electron").ipcRenderer;
+  const electron = require("electron");
+  ipcRenderer = electron.ipcRenderer;
+  shell = electron.shell;
 }
 
 export default {
@@ -117,18 +151,22 @@ export default {
     if (process.env.VUE_APP_ELECTRON_ENV) {
       ipcRenderer.on("checking-for-update", () => {});
       ipcRenderer.on("update-available", () => {
-        this.updating = true;
+        this.updateAvailable = true;
       });
       ipcRenderer.on("update-not-available", () => {
+        this.updateAvailable = false;
         this.updating = false;
       });
       ipcRenderer.on("update-error", () => {
+        this.updateAvailable = false;
         this.updating = false;
       });
       ipcRenderer.on("update-download-progress", (event, data) => {
+        this.updating = true;
         this.updateProgress = data;
       });
       ipcRenderer.on("update-downloaded", () => {
+        this.updating = false;
         this.updateFinished = true;
         this.updateProgress = {};
       });
@@ -156,11 +194,20 @@ export default {
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       restartApp() {
         ipcRenderer.send("restart-app");
+      },
+      openReleases() {
+        shell.openExternal(
+          "https://github.com/p0thi/discord-bot-website/releases/"
+        );
+      },
+      install() {
+        ipcRenderer.send("download-update");
       }
     })
   },
   data: () => ({
     ...(process.env.VUE_APP_ELECTRON_ENV && {
+      updateAvailable: false,
       updating: false,
       updateProgress: undefined,
       updateFinished: false
