@@ -17,18 +17,16 @@ module.exports = {
         productName: "Pothi-Bot Manager",
         nsis: {
           oneClick: false,
-          perMachine: true
+          perMachine: true,
+          allowToChangeInstallationDirectory: true
         },
         win: {
-          icon: "public/logo_round.png",
-          target: ["nsis"]
+          target: ["portable", "nsis"]
         },
         mac: {
-          icon: "public/logo_round.png",
           target: ["dmg"]
         },
         linux: {
-          icon: "public/logo_round.png",
           target: ["AppImage"]
         },
         publish: [

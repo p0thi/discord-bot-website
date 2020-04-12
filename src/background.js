@@ -1,5 +1,6 @@
 "use strict";
 
+/* global __static */
 import {
   app,
   protocol,
@@ -17,9 +18,7 @@ import { autoUpdater } from "electron-updater";
 const nodeUrl = require("url");
 const store = require("electron-settings");
 const path = require("path");
-/*eslint-disable */
-const icon = path.join(__static, "logo-round.png");
-/*eslint-enable */
+const icon = path.join(__static, "icon.png");
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 let appTray;
