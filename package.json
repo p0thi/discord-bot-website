@@ -26,6 +26,7 @@
     "electron-settings": "^3.2.0",
     "electron-updater": "^4.2.5",
     "get-image-colors": "^2.0.0",
+    "js-file-download": "^0.4.11",
     "keycodemap": "^1.4.7",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5",
@@ -34,7 +35,8 @@
     "vuetify-confirm": "^2.0.2",
     "vuetify-toast-snackbar": "^0.6.1",
     "vuex": "^3.1.2",
-    "vuex-electron": "^1.0.3"
+    "vuex-electron": "^1.0.3",
+    "wavesurfer.js": "^3.3.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.2.0",

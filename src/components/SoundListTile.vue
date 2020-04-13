@@ -5,23 +5,29 @@
       <span>{{ sound.command }}</span>
       <v-spacer></v-spacer>
 
-      <v-menu top :close-on-content-click="false">
+      <v-menu top open-on-hover :close-on-content-click="false">
         <template v-slot:activator="{ on: menu }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on: tooltip }">
               <v-btn v-on="{ ...tooltip, ...menu }" icon>
-                <v-icon>mdi-music-note</v-icon>
+                <v-icon
+                  :class="{ shake: listening }"
+                  :color="listening ? 'green' : ''"
+                  >mdi-music-note</v-icon
+                >
               </v-btn>
             </template>
             <span>Sound anhören</span>
           </v-tooltip>
         </template>
 
-        <vuetify-audio
+        <audio-player
           :file="audioFile"
+          :sound="sound"
+          @playing="setListening"
           color="primary"
           downloadable
-        ></vuetify-audio>
+        ></audio-player>
         <!-- <audio controls>
             <source :src="audioFile">
             Der Browser unterstützt dieses Format nicht
@@ -40,9 +46,9 @@
             <v-icon>mdi-location-enter</v-icon>
           </v-btn>
         </template>
-        <span>
-          {{ isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv" }}
-        </span>
+        <span>{{
+          isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv"
+        }}</span>
       </v-tooltip>
     </v-card-title>
     <v-card-subtitle>{{ sound.description }}</v-card-subtitle>
@@ -105,7 +111,7 @@ if (process.env.VUE_APP_ELECTRON_ENV) {
 export default {
   //   name: "sound-list-tile",
   components: {
-    VuetifyAudio: () => import("vuetify-audio")
+    AudioPlayer: () => import("./AudioPlayer")
   },
   ...(process.env.VUE_APP_ELECTRON_ENV && {
     created() {
@@ -187,6 +193,9 @@ export default {
         ipcRenderer.send("delete-hotkey", this.sound);
       }
     }),
+    setListening(val) {
+      this.listening = val;
+    },
     toggleJoinSound() {
       this.$confirm(
         `Willst du diesen Sound wirklich als Join-Sound ${
@@ -316,6 +325,7 @@ export default {
     return {
       isWebsite: !process.env.VUE_APP_ELECTRON_ENV,
       soundPlaying: false,
+      listening: false,
       changingJoinSound: false,
       hotkeyText: undefined,
       recordingState: false
@@ -324,3 +334,35 @@ export default {
   }
 };
 </script>
+<style lang="scss">
+.shake {
+  animation: shake-animation 1s ease infinite;
+}
+
+@keyframes shake-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(20deg);
+  }
+  20% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-20deg);
+  }
+  40% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(20deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+</style>

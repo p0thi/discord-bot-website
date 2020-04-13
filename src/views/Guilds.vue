@@ -125,6 +125,7 @@
         </v-card-text>
       </v-card>
     </v-col>
+
     <v-col v-if="activeGuild" cols="12">
       <v-card v-if="filteredSortedGuilds.length > 0" outlined>
         <v-card-title>
@@ -304,6 +305,7 @@ import { mapGetters, mapActions } from "vuex";
 import getColors from "get-image-colors";
 import chroma from "chroma-js";
 import axios from "axios";
+// import WaveSurfer from 'wavesurfer.js'
 // import * as Vibrant from "node-vibrant";
 
 import SoundListTile from "../components/SoundListTile";
@@ -645,6 +647,7 @@ export default {
       baseUrl: process.env.VUE_APP_API_BASE_URL,
 
       palettes: {},
+      waveSurfer: undefined,
 
       currentSoundPage: 1,
       soundsPerPage: 16,
