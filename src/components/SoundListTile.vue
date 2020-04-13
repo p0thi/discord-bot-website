@@ -4,6 +4,30 @@
       <span>{{ commandPrefix }}</span>
       <span>{{ sound.command }}</span>
       <v-spacer></v-spacer>
+
+      <v-menu top :close-on-content-click="false">
+        <template v-slot:activator="{ on: menu }">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn v-on="{ ...tooltip, ...menu }" icon>
+                <v-icon>mdi-music-note</v-icon>
+              </v-btn>
+            </template>
+            <span>Sound anhören</span>
+          </v-tooltip>
+        </template>
+
+        <vuetify-audio
+          :file="audioFile"
+          color="primary"
+          downloadable
+        ></vuetify-audio>
+        <!-- <audio controls>
+            <source :src="audioFile">
+            Der Browser unterstützt dieses Format nicht
+        </audio>-->
+      </v-menu>
+
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
@@ -16,9 +40,9 @@
             <v-icon>mdi-location-enter</v-icon>
           </v-btn>
         </template>
-        <span>{{
-          isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv"
-        }}</span>
+        <span>
+          {{ isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv" }}
+        </span>
       </v-tooltip>
     </v-card-title>
     <v-card-subtitle>{{ sound.description }}</v-card-subtitle>
@@ -65,7 +89,7 @@
 </template>
 <script>
 import axios from "axios";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import HotkeyRecorder from "../util/HotkeyRecorder";
 // const HotkeyRecorder = () => import("../util/HotkeyRecorder")
 // if (process.env.VUE_APP_ELECTRON_ENV)
@@ -80,6 +104,9 @@ if (process.env.VUE_APP_ELECTRON_ENV) {
 
 export default {
   //   name: "sound-list-tile",
+  components: {
+    VuetifyAudio: () => import("vuetify-audio")
+  },
   ...(process.env.VUE_APP_ELECTRON_ENV && {
     created() {
       ipcRenderer.once(`send-hotkeys-${this.sound.id}`, (event, data) => {
@@ -263,6 +290,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(["token"]),
     recording: {
       get() {
         return this.recordingState;
@@ -271,6 +299,9 @@ export default {
         this.$emit("recordingState", value);
         this.recordingState = value;
       }
+    },
+    audioFile() {
+      return `${process.env.VUE_APP_API_BASE_URL}/api/sounds/listen/${this.sound.id}?token=${this.token}`;
     }
   },
   props: {

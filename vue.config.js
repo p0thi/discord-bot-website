@@ -20,6 +20,12 @@ module.exports = {
           perMachine: true,
           allowToChangeInstallationDirectory: true
         },
+        appImage: {
+          desktop: {
+            Name: "Pothi-Bot Manager",
+            Comment: "Manager for the Pothi-Bot on discord"
+          }
+        },
         win: {
           target: ["portable", "nsis"]
         },
@@ -27,12 +33,7 @@ module.exports = {
           target: ["dmg"]
         },
         linux: {
-          target: ["AppImage"],
-          desktop: {
-            Name: "Pothi-Bot Manager",
-            Icon: "build/256x256.png",
-            Comment: "Manager for the Pothi-Bot on discord"
-          }
+          target: ["AppImage"]
         },
         publish: [
           {
