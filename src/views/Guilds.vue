@@ -205,7 +205,7 @@
                 </v-btn-toggle>
                 <v-radio-group v-model="sortMethod">
                   <v-radio
-                    v-for="(item, i) in sortings"
+                    v-for="(item, i) in soundSortings"
                     :key="item.name"
                     :label="item.name"
                     :value="i"
@@ -575,7 +575,7 @@ export default {
         // console.log("after length", result.length);
       }
 
-      let sortMethod = this.sortings[this.sortMethod];
+      let sortMethod = this.soundSortings[this.sortMethod];
 
       result = sortMethod.sort(result, this.sortDirection);
 
@@ -620,7 +620,7 @@ export default {
       },
       sortDirection: 1,
       sortMethod: 0,
-      sortings: [
+      soundSortings: [
         {
           name: "Alphabetisch",
           sort(list, direction) {
