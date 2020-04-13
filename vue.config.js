@@ -27,7 +27,12 @@ module.exports = {
           target: ["dmg"]
         },
         linux: {
-          target: ["AppImage"]
+          target: ["AppImage"],
+          desktop: {
+            Name: "Pothi-Bot Manager",
+            Icon: "build/256x256.png",
+            Comment: "Manager for the Pothi-Bot on discord"
+          }
         },
         publish: [
           {
