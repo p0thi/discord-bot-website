@@ -2,9 +2,28 @@
   <v-row>
     <v-col cols="12">
       <v-card outlined>
-        <v-card-title>Server auswählen</v-card-title>
+        <v-card-title>
+          <span>Server auswählen</span>
+          <v-spacer></v-spacer>
+          <v-text-field
+            class="mx-4"
+            v-model="guildSearchString"
+            flat
+            hide-details
+            label="Suchen"
+            clearable
+            prepend-inner-icon="mdi-magnify"
+            solo-inverted
+          ></v-text-field>
+        </v-card-title>
         <v-card-text>
-          <v-col v-if="!guilds || guilds.length === 0">
+          <v-col
+            v-if="
+              !guilds ||
+                guilds.length === 0 ||
+                filteredSortedGuilds.length === 0
+            "
+          >
             <span v-if="fetchingGuilds">
               Lädt...
               <v-progress-linear
@@ -12,11 +31,14 @@
                 color="primary"
               ></v-progress-linear>
             </span>
+            <span v-else-if="filteredSortedGuilds.length === 0"
+              >Zu dieser Suche wurde kein Server gefunden</span
+            >
             <span v-else>Kein Server geladen oder vorhanden</span>
           </v-col>
           <v-slide-group v-else v-model="slide" show-arrows mandatory>
             <v-slide-item
-              v-for="guild in guilds"
+              v-for="guild in filteredSortedGuilds"
               :key="guild.id"
               v-slot:default="{ active, toggle }"
               :value="guild.id"
@@ -30,18 +52,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{
-                      guild.name
-                    }}</v-card-title>
+                    <v-card-title class="headline">
+                      {{ guild.name }}
+                    </v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds.length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{ guild.commandPrefix }}
-                        </span>
+                        <span class="font-weight-bold">{{
+                          guild.commandPrefix
+                        }}</span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -104,7 +126,7 @@
       </v-card>
     </v-col>
     <v-col v-if="activeGuild" cols="12">
-      <v-card outlined>
+      <v-card v-if="filteredSortedGuilds.length > 0" outlined>
         <v-card-title>
           <span>
             <v-avatar
@@ -113,14 +135,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -269,6 +291,9 @@
             </v-col>
           </v-row>
         </v-card-text>
+      </v-card>
+      <v-card v-else>
+        <v-card-text>Kein Server ausgewählt</v-card-text>
       </v-card>
     </v-col>
     <v-col v-else cols="9"></v-col>
@@ -594,6 +619,25 @@ export default {
       return Math.ceil(
         this.filteredSortedActiveGuildSounds.length / this.soundsPerPage
       );
+    },
+    filteredSortedGuilds() {
+      let result = this.guilds;
+
+      if (
+        this.guildSearchString &&
+        typeof this.guildSearchString === "string" &&
+        this.guildSearchString.trim().length >= 2
+      ) {
+        const searchString = this.guildSearchString.trim().toLowerCase();
+        result = result.filter(guild => {
+          return (
+            guild.name.toLowerCase().includes(searchString) ||
+            guild.name.toLowerCase().includes(searchString)
+          );
+        });
+      }
+
+      return result;
     }
   },
   data() {
@@ -611,6 +655,7 @@ export default {
       fetchingGuilds: false,
       guildColors: {},
       activeGuildId: undefined,
+      guildSearchString: "",
 
       addSoundDialog: false,
       addSoundFormData: {
