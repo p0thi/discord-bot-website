@@ -52,18 +52,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">{{
-                          guild.commandPrefix
-                        }}</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -136,14 +136,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -278,6 +278,12 @@
                 :isJoinSound="activeGuild.joinSound === sound.id"
               ></sound-list-tile>
             </v-col>
+          </v-row>
+          <v-row v-else-if="fetchingSounds">
+            <v-progress-linear
+              indeterminate
+              color="primary"
+            ></v-progress-linear>
           </v-row>
           <v-row v-else>
             <v-col>Bisher keine Sounds verfügbar</v-col>
@@ -474,12 +480,14 @@ export default {
     }),
     reload() {
       this.fetchingGuilds = true;
+      this.fetchingSounds = true;
       let promises = [this.fetchGuilds()];
       if (this.activeGuild) {
         promises.push(this.fetchSounds(this.activeGuild.id));
       }
       Promise.all(promises).finally(() => {
         this.fetchingGuilds = false;
+        this.fetchingSounds = false;
       });
     },
     recordingStateChange(value) {
@@ -673,6 +681,7 @@ export default {
       soundPlaying: false,
 
       fetchingGuilds: false,
+      fetchingSounds: true,
       guildColors: {},
       activeGuildId: undefined,
       guildSearchString: "",
