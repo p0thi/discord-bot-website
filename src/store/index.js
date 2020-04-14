@@ -11,14 +11,16 @@ const store = new Vuex.Store({
     loginStatus: "",
     token: localStorage.getItem("token") || "",
     user: {},
-    guilds: []
+    guilds: [],
+    sounds: {}
   },
   getters: {
     isLoggedIn: state => !!state.token,
     authStatus: state => state.loginStatus,
     token: state => state.token,
     user: state => state.user,
-    guilds: state => state.guilds
+    guilds: state => state.guilds,
+    sounds: state => state.sounds
   },
   mutations: {
     auth_request(state) {
@@ -44,6 +46,9 @@ const store = new Vuex.Store({
     },
     setUser(state, user) {
       state.user = user;
+    },
+    setGuildSounds(state, payload) {
+      Vue.set(state.sounds, payload.guildId, payload.sounds);
     }
   },
   actions: {
@@ -94,6 +99,25 @@ const store = new Vuex.Store({
         }
         commit("logout");
         resolve();
+      });
+    },
+    fetchSounds({ commit }, guildId) {
+      return new Promise((resolve, reject) => {
+        if (!guildId || typeof guildId !== "string") {
+          reject(new Error("Property guildId not valid string"));
+          return;
+        }
+        axios
+          .get(
+            `${process.env.VUE_APP_API_BASE_URL}/api/sounds/guildsounds/${guildId}`
+          )
+          .then(response => {
+            commit("setGuildSounds", { guildId, sounds: response.data });
+            resolve(response.data);
+          })
+          .catch(err => {
+            reject(err);
+          });
       });
     },
     fetchGuilds({ commit }, source) {

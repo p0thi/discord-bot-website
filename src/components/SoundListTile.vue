@@ -5,7 +5,7 @@
       <span>{{ sound.command }}</span>
       <v-spacer></v-spacer>
 
-      <v-menu top open-on-hover :close-on-content-click="false">
+      <v-menu top :close-on-content-click="false">
         <template v-slot:activator="{ on: menu }">
           <v-tooltip bottom>
             <template v-slot:activator="{ on: tooltip }">
@@ -95,7 +95,7 @@
 </template>
 <script>
 import axios from "axios";
-import { mapActions, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 import HotkeyRecorder from "../util/HotkeyRecorder";
 // const HotkeyRecorder = () => import("../util/HotkeyRecorder")
 // if (process.env.VUE_APP_ELECTRON_ENV)
@@ -138,7 +138,6 @@ export default {
     }
   }),
   methods: {
-    ...mapActions(["fetchGuilds"]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       handleHotkeyUpdate(event, data) {
         if (data) {
@@ -276,7 +275,7 @@ export default {
                 dismissable: true,
                 queueable: true
               });
-              this.fetchGuilds("Sound deletion");
+              this.$emit("deleted");
             })
             .catch(() => {
               this.$toast.error(`Der Befehl konnte nicht gelöscht werden.`, {

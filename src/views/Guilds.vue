@@ -52,18 +52,20 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
-                      <div>{{ guild.sounds.length }} Sounds verfügbar</div>
+                      <div>
+                        {{ getSoundsOfGuild(guild.id).length }} Sounds verfügbar
+                      </div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">{{
-                          guild.commandPrefix
-                        }}</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -104,7 +106,7 @@
                   <div :style="{ color: getPalette(guild.id).second }">
                     <v-card-title class="headline">{{ guild.name }}</v-card-title>
                     <v-card-subtitle :style="{ color: getPalette(guild.id).second }">
-                      <div>{{ guild.sounds.length }} Sounds verfügbar</div>
+                      <div>{{ getSoundsOfGuild(guild.id).length }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
                         <span class="font-weight-bold">
@@ -136,14 +138,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -258,7 +260,7 @@
           ></v-text-field>
         </v-card-title>
         <v-card-text>
-          <v-row v-if="activeGuild && activeGuild.sounds.length > 0">
+          <v-row v-if="activeGuild && activeGuildSounds.length > 0">
             <v-col
               v-for="(sound, i) in getPaginatedSounds"
               :key="sound.id + i"
@@ -270,6 +272,7 @@
               <sound-list-tile
                 @joinValueChanged="soundJoinValueChanged(sound, $event)"
                 @recordingState="recordingStateChange"
+                @deleted="reload()"
                 :commandPrefix="activeGuild.commandPrefix"
                 :sound="sound"
                 :guildId="activeGuild.id"
@@ -301,7 +304,7 @@
   </v-row>
 </template>
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 import getColors from "get-image-colors";
 import chroma from "chroma-js";
 import axios from "axios";
@@ -322,7 +325,7 @@ export default {
   created() {
     if (!this.guilds || this.guilds.length === 0) {
       this.reload();
-      // this.addSoundHotkeys(this.activeGuild.sounds)
+      // this.addSoundHotkeys(this.activeGuildSounds)
       let lastGuild;
       if (process.env.VUE_APP_ELECTRON_ENV) {
         lastGuild = ipcRenderer.sendSync("get-last-selected-guild");
@@ -334,17 +337,22 @@ export default {
   },
   ...(process.env.VUE_APP_ELECTRON_ENV && {
     beforeDestroy() {
-      // this.removeSoundHotkeys(this.activeGuild.sounds)
+      // this.removeSoundHotkeys(this.activeGuildSounds)
     }
   }),
   watch: {
     ...(process.env.VUE_APP_ELECTRON_ENV && {
-      activeGuild: {
+      activeGuild(to) {
+        if (!this.sounds[to.id]) {
+          this.fetchSounds(to.id);
+        }
+      },
+      activeGuildSounds: {
         immediate: true,
         deep: true,
         handler(to, from) {
-          const toSounds = to && to.sounds ? to.sounds : [];
-          const fromSounds = from && from.sounds ? from.sounds : [];
+          const toSounds = to || [];
+          const fromSounds = from || [];
 
           let remove = fromSounds.filter(x => !toSounds.includes(x));
           let add = toSounds.filter(x => !fromSounds.includes(x));
@@ -354,6 +362,7 @@ export default {
         }
       }
     }),
+
     $route: {
       immediate: true,
       handler(to) {
@@ -418,7 +427,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["fetchGuilds"]),
+    ...mapActions(["fetchGuilds", "fetchSounds"]),
+    ...mapMutations(["setGuildSounds"]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       addSoundHotkeys(add) {
         add.forEach(x => {
@@ -467,7 +477,11 @@ export default {
     }),
     reload() {
       this.fetchingGuilds = true;
-      this.fetchGuilds().finally(() => {
+      let promises = [this.fetchGuilds()];
+      if (this.activeGuild) {
+        promises.push(this.fetchSounds(this.activeGuild.id));
+      }
+      Promise.all(promises).finally(() => {
         this.fetchingGuilds = false;
       });
     },
@@ -475,7 +489,7 @@ export default {
       if (value) {
         ipcRenderer.send("unlisten-all-sounds");
       } else {
-        ipcRenderer.send("listen-all-sounds", this.activeGuild.sounds);
+        ipcRenderer.send("listen-all-sounds", this.activeGuildSounds);
       }
     },
     soundJoinValueChanged(sound, newVal) {
@@ -531,10 +545,17 @@ export default {
             `Befehl konnte nicht gespeichert werden: <b>${e.response.data.message}</b>`
           );
         });
+    },
+    getSoundsOfGuild(guildId) {
+      const sounds = this.sounds[guildId];
+      // if (!sounds) {
+      //   this.fetchSounds(guildId);
+      // }
+      return sounds || [];
     }
   },
   computed: {
-    ...mapGetters(["guilds"]),
+    ...mapGetters(["guilds", "sounds"]),
     activeGuild: {
       get() {
         for (const guild of this.guilds) {
@@ -560,17 +581,25 @@ export default {
         this.$router.push({ query: { guild: value } }).catch(() => {});
       }
     },
+    activeGuildSounds() {
+      console.log("getting sounds");
+      if (!this.activeGuild) {
+        return [];
+      }
+      const guildSounds = this.getSoundsOfGuild(this.activeGuild.id);
+      return guildSounds || [];
+    },
     activeGuildCommands() {
       if (!this.activeGuild) {
         return [];
       }
-      return this.activeGuild.sounds.map(sound => sound.command);
+      return this.activeGuildSounds.map(sound => sound.command);
     },
     filteredSortedActiveGuildSounds() {
       if (!this.activeGuild) {
         return [];
       }
-      let sounds = this.activeGuild.sounds;
+      let sounds = this.activeGuildSounds;
 
       let result = sounds;
       // console.log("array", result);
