@@ -128,9 +128,16 @@ export default {
     };
   },
   watch: {
-    playing(to) {
-      this.$emit("playing", to);
-    }
+    // playing(to) {
+    //   this.$emit("playing", to);
+    //   console.log('playing: ', to);
+    // },
+    // paused: {
+    //   immediate: true,
+    //   handler(to) {
+    //   console.log('paused:', to)
+    // }
+    // }
   },
   methods: {
     setPosition(e) {
@@ -144,15 +151,20 @@ export default {
       this.paused = true;
       this.playing = false;
       this.audio.currentTime = 0;
+      this.$emit("playing", false);
     },
     play() {
       if (this.playing) return;
-      this.audio.play().then(() => (this.playing = true));
+      this.audio.play().then(() => {
+        this.playing = true;
+        this.$emit("playing", true);
+      });
       this.paused = false;
     },
     pause() {
       this.paused = !this.paused;
       this.paused ? this.audio.pause() : this.audio.play();
+      this.$emit("playing", !this.paused);
     },
     download() {
       this.audio.pause();
@@ -226,6 +238,7 @@ export default {
     },
     _handleEnded() {
       this.paused = this.playing = false;
+      this.$emit("playing", false);
     },
     init: function() {
       this.audio.addEventListener("timeupdate", this._handlePlayingUI);

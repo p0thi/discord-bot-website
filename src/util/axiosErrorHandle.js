@@ -1,6 +1,8 @@
 import axios from "axios";
 import store from "../store";
 
+// const errorSound = new Audio('@/assets/error.mp3');
+
 export default function setup(vue) {
   axios.interceptors.response.use(
     response => response,
@@ -16,15 +18,18 @@ export default function setup(vue) {
             }
           );
           break;
-        case 429:
+        case 429: {
           vue.$toast.error(
-            "Du musst warten, bevor du weitere Befehle senden kannst",
+            "<b>SPAMSCHUTZ:</b><br>Du musst warten, bevor du weitere Befehle senden kannst",
             {
               dismissable: true,
-              queueable: true
+              queueable: false
             }
           );
+          const errorSound = new Audio(require("../assets/error.mp3"));
+          errorSound.play();
           break;
+        }
       }
 
       return Promise.reject(err);

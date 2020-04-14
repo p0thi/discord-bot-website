@@ -242,15 +242,6 @@ export default {
         .catch(e => {
           if (e.response) {
             switch (e.response.status) {
-              case 429:
-                this.$toast.error(
-                  "Du musst kurz warten, bevor du weitere Befehle senden kannst",
-                  {
-                    dismissable: true,
-                    queueable: true
-                  }
-                );
-                break;
               case 409:
                 this.$toast.error(
                   "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
