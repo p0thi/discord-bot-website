@@ -52,18 +52,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">
-                      {{ guild.name }}
-                    </v-card-title>
+                    <v-card-title class="headline">{{
+                      guild.name
+                    }}</v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">{{
-                          guild.commandPrefix
-                        }}</span>
+                        <span class="font-weight-bold">
+                          {{ guild.commandPrefix }}
+                        </span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -136,14 +136,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -278,9 +278,14 @@
                 :isJoinSound="activeGuild.joinSound === sound.id"
               >
                 <template v-if="sortMethod === 1" v-slot:date>
-                  <div class="caption grey--text">
-                    {{ getFormatedCreationDate(sound) }}
-                  </div>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on" class="caption grey--text">
+                        {{ getFormatedCreationDate(sound) }}
+                      </div>
+                    </template>
+                    <span>{{ getFormatedCreationDate(sound, true) }}</span>
+                  </v-tooltip>
                 </template>
               </sound-list-tile>
             </v-col>
@@ -565,9 +570,13 @@ export default {
       // }
       return sounds || [];
     },
-    getFormatedCreationDate(sound) {
+    getFormatedCreationDate(sound, long = false) {
       moment.locale("de");
-      return moment(sound.createdAt).format("ddd Do MMM YYYY");
+      if (long) {
+        return moment(sound.createdAt).format("ddd Do MMMM YYYY - HH:MM [Uhr]");
+      } else {
+        return moment(sound.createdAt).format("DD.MM.YYYY");
+      }
     }
   },
   computed: {
