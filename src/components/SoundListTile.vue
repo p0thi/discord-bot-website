@@ -1,8 +1,7 @@
 <template>
   <v-card outlined>
     <v-card-title>
-      <span>{{ commandPrefix }}</span>
-      <span>{{ sound.command }}</span>
+      <span>{{ commandPrefix }}{{ sound.command }}</span>
       <v-spacer></v-spacer>
 
       <v-menu top :close-on-content-click="false">
@@ -186,7 +185,14 @@ export default {
                   ipcRenderer.send("store-hotkey", register);
                 })
                 .catch(() => reject());
-            }).catch(e => console.log(e));
+            }).catch(e => {
+              this.hotkeyText = undefined;
+              this.$toast.error(e, {
+                dismissable: true,
+                queueable: true
+              });
+              console.log(e);
+            });
           }
         );
       },
