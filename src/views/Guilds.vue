@@ -573,7 +573,7 @@ export default {
     getFormatedCreationDate(sound, long = false) {
       moment.locale("de");
       if (long) {
-        return moment(sound.createdAt).format("ddd Do MMMM YYYY - HH:MM [Uhr]");
+        return moment(sound.createdAt).format("ddd Do MMMM YYYY - HH:mm [Uhr]");
       } else {
         return moment(sound.createdAt).format("DD.MM.YYYY");
       }
