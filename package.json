@@ -1,7 +1,7 @@
 {
   "name": "discord-bot-website",
   "description": "Manager for the Pothi-Bot on discord",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Pascal Pothmann",
   "private": true,
   "scripts": {
@@ -28,6 +28,7 @@
     "get-image-colors": "^2.0.0",
     "js-file-download": "^0.4.11",
     "keycodemap": "^1.4.7",
+    "moment": "^2.24.0",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5",
     "vuetify": "^2.2.11",

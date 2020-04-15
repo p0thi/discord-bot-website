@@ -52,18 +52,18 @@
               >
                 <div class="d-flex flex-no-wrap justify-space-around">
                   <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{
-                      guild.name
-                    }}</v-card-title>
+                    <v-card-title class="headline">
+                      {{ guild.name }}
+                    </v-card-title>
                     <v-card-subtitle
                       :style="{ color: getPalette(guild.id).second }"
                     >
                       <div>{{ guild.sounds }} Sounds verfügbar</div>
                       <div class="body-2 font-weight-thin">
                         <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{ guild.commandPrefix }}
-                        </span>
+                        <span class="font-weight-bold">{{
+                          guild.commandPrefix
+                        }}</span>
                       </div>
                     </v-card-subtitle>
                   </div>
@@ -136,14 +136,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -218,7 +218,7 @@
             <v-card>
               <v-card-title>Sortierung</v-card-title>
               <v-card-text>
-                <v-btn-toggle v-model="sortDirection">
+                <v-btn-toggle v-model="sortDirection" mandatory>
                   <v-btn :value="-1" icon>
                     <v-icon>mdi-sort-descending</v-icon>
                   </v-btn>
@@ -276,7 +276,13 @@
                 :guildId="activeGuild.id"
                 :editable="sound.creator || activeGuild.owner"
                 :isJoinSound="activeGuild.joinSound === sound.id"
-              ></sound-list-tile>
+              >
+                <template v-if="sortMethod === 1" v-slot:date>
+                  <div class="caption grey--text">
+                    {{ getFormatedCreationDate(sound) }}
+                  </div>
+                </template>
+              </sound-list-tile>
             </v-col>
           </v-row>
           <v-row v-else-if="fetchingSounds">
@@ -312,6 +318,7 @@ import { mapGetters, mapActions, mapMutations } from "vuex";
 import getColors from "get-image-colors";
 import chroma from "chroma-js";
 import axios from "axios";
+import moment from "moment";
 // import WaveSurfer from 'wavesurfer.js'
 // import * as Vibrant from "node-vibrant";
 
@@ -557,6 +564,10 @@ export default {
       //   this.fetchSounds(guildId);
       // }
       return sounds || [];
+    },
+    getFormatedCreationDate(sound) {
+      moment.locale("de");
+      return moment(sound.createdAt).format("ddd Do MMM YYYY");
     }
   },
   computed: {
@@ -697,10 +708,24 @@ export default {
       soundSortings: [
         {
           name: "Alphabetisch",
+          description: "Sortiert die Einträge in alphabetischer Reihenfolge",
           sort(list, direction) {
             return list.sort(
               (a, b) => direction * a.command.localeCompare(b.command)
             );
+          }
+        },
+        {
+          name: "Erstellungsdatum",
+          description: "Sortiert die Einträge nach Erstellungsdatum",
+          sort(list, direction) {
+            return list.sort((a, b) => {
+              const aDate = moment(a.createdAt);
+              const bDate = moment(b.createdAt);
+
+              const result = aDate > bDate ? 1 : bDate > aDate ? -1 : 0;
+              return direction * result;
+            });
           }
         }
       ],

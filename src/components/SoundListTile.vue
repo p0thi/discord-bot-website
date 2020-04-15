@@ -46,12 +46,15 @@
             <v-icon>mdi-location-enter</v-icon>
           </v-btn>
         </template>
-        <span>{{
-          isJoinSound ? "Join-Sound aktiv" : "Join-Sound nicht aktiv"
-        }}</span>
+        <span>
+          {{ isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen" }}
+        </span>
       </v-tooltip>
     </v-card-title>
-    <v-card-subtitle>{{ sound.description }}</v-card-subtitle>
+    <v-card-subtitle
+      ><div>{{ sound.description }}</div>
+      <slot name="date"></slot
+    ></v-card-subtitle>
     <v-card-actions>
       <v-btn :loading="soundPlaying" @click="playSound" color="success" icon>
         <v-icon large>mdi-play</v-icon>
@@ -308,6 +311,7 @@ export default {
     sound: { type: Object, required: true },
     guildId: { type: String, required: true },
     editable: { type: Boolean, default: false },
+    showCreationDate: { type: Boolean, default: false },
     isJoinSound: { typpe: Boolean, default: false },
     hotkey: { type: String, required: false }
   },
