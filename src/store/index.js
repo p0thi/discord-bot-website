@@ -29,7 +29,7 @@ const store = new Vuex.Store({
     token: "",
     sortDirection: 1,
     sortMethod: 0,
-    favouriteSoundsFirst: false,
+    favouriteSoundsFirst: true,
     user: {},
     guilds: [],
     sounds: {}

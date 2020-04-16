@@ -15,9 +15,7 @@
         ></v-img>
       </v-avatar>
       <div :style="{ color: palette.second }">
-        <v-card-title class="headline">
-          {{ guild.name }}
-        </v-card-title>
+        <v-card-title class="headline">{{ guild.name }}</v-card-title>
         <v-card-subtitle :style="{ color: palette.second }">
           <div>{{ guild.sounds }} Sounds verfügbar</div>
           <div class="body-2 font-weight-thin">
@@ -26,7 +24,7 @@
           </div>
         </v-card-subtitle>
       </div>
-      <div>
+      <div class="d-flex flex-column">
         <v-btn
           @click="toggleFavourite"
           :color="palette.second"
@@ -35,6 +33,41 @@
         >
           <v-icon>{{ isFavourite ? "mdi-star" : "mdi-star-outline" }}</v-icon>
         </v-btn>
+        <v-spacer></v-spacer>
+        <v-dialog v-if="guild.editable" v-model="settingsDialog" width="400px">
+          <template v-slot:activator="{ on }">
+            <v-btn
+              v-on="on"
+              :color="palette.second"
+              :loading="settingsLoading"
+              icon
+            >
+              <v-icon>mdi-cogs</v-icon>
+            </v-btn>
+          </template>
+
+          <v-card>
+            <v-card-title>Einstellungen: {{ guild.name }}</v-card-title>
+            <v-form ref="settingsForm">
+              <v-card-text>
+                <v-select
+                  v-model="commandPrefix"
+                  label="Kommando-Symbol"
+                  persistent-hint
+                  hint="Zeichen, mit dem Befehle im discord Chat beginnen"
+                  :items="validPrefixes"
+                  required
+                  dense
+                ></v-select>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn @click="abortSettings" color="red" text>Abbrechen</v-btn>
+                <v-btn @click="saveSettings" text>Speichern</v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-card>
+        </v-dialog>
       </div>
     </div>
   </v-card>
@@ -46,7 +79,38 @@ import axios from "axios";
 export default {
   name: "guild-list-tile",
   methods: {
-    ...mapActions(["fetchUser"]),
+    ...mapActions(["fetchUser", "fetchGuilds"]),
+    abortSettings() {
+      // this.$refs.settingsForm.reset();
+      this.settingsDialog = false;
+    },
+    saveSettings() {
+      this.settingsLoading = true;
+      axios
+        .post(
+          `${process.env.VUE_APP_API_BASE_URL}/api/guilds/settings/${this.guild.id}`,
+          {
+            commandPrefix: this.commandPrefix
+          }
+        )
+        .then(resp => {
+          this.guild.commandPrefix = resp.data.data.commandPrefix;
+          this.fetchGuilds();
+        })
+        .catch(err => {
+          this.$toast.error(
+            `Einstellungen konnten nicht gespeichert werden: ${err.response.data.message}`,
+            {
+              dismissable: true
+            }
+          );
+        })
+        .finally(() => {
+          this.$refs.settingsForm.reset();
+          this.settingsLoading = false;
+          this.settingsDialog = false;
+        });
+    },
     toggleFavourite() {
       this.favouriteLoading = true;
       const method = this.isFavourite ? "remove" : "add";
@@ -84,11 +148,45 @@ export default {
         return false;
       }
       return this.user.favouriteGuilds.includes(this.guild.id);
+    },
+    commandPrefix: {
+      get() {
+        return this.prefix || this.guild.commandPrefix;
+      },
+      set(value) {
+        this.prefix = value;
+      }
     }
   },
   data() {
     return {
-      favouriteLoading: false
+      favouriteLoading: false,
+      settingsLoading: false,
+      settingsDialog: false,
+      prefix: undefined,
+      rules: {},
+      validPrefixes: [
+        "!",
+        "#",
+        "+",
+        "-",
+        "$",
+        "§",
+        "%",
+        "&",
+        "\\",
+        "(",
+        ")",
+        "=",
+        "?",
+        ".",
+        ",",
+        "|",
+        "[",
+        "]",
+        "^",
+        "€"
+      ]
     };
   },
   props: {

@@ -318,7 +318,8 @@ export default {
     }),
     activeGuild(to) {
       if (!this.sounds[to.id]) {
-        this.fetchSounds(to.id);
+        this.fetchingSounds = true;
+        this.fetchSounds(to.id).finally(() => (this.fetchingSounds = false));
       }
     },
     $route: {
