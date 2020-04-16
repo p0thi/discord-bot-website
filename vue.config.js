@@ -24,7 +24,8 @@ module.exports = {
           desktop: {
             Name: "Pothi-Bot Manager",
             Comment: "Manager for the Pothi-Bot on discord"
-          }
+          },
+          artifactName: "${productName}.${ext}"
         },
         win: {
           target: ["portable", "nsis"]

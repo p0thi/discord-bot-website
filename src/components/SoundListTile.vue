@@ -1,59 +1,77 @@
 <template>
   <v-card outlined>
-    <v-card-title>
-      <span>{{ commandPrefix }}{{ sound.command }}</span>
-      <v-spacer></v-spacer>
+    <v-card-title class="d-flex flex-row-reverse">
+      <div>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              @click="toggleFavourite"
+              v-on="on"
+              :color="isFavourite ? 'primary' : 'grey'"
+              :loading="favouriteLoading"
+              icon
+            >
+              <v-icon>
+                {{ isFavourite ? "mdi-star" : "mdi-star-outline" }}
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>{{ isFavourite ? "Favorit entfernen" : "Favorisieren" }}</span>
+        </v-tooltip>
 
-      <v-menu top :close-on-content-click="false">
-        <template v-slot:activator="{ on: menu }">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="{ ...tooltip, ...menu }" icon>
-                <v-icon
-                  :class="{ shake: listening }"
-                  :color="listening ? 'green' : ''"
-                  >mdi-music-note</v-icon
-                >
-              </v-btn>
-            </template>
-            <span>Sound anhören</span>
-          </v-tooltip>
-        </template>
+        <v-menu top :close-on-content-click="false">
+          <template v-slot:activator="{ on: menu }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on: tooltip }">
+                <v-btn v-on="{ ...tooltip, ...menu }" icon>
+                  <v-icon
+                    :class="{ shake: listening }"
+                    :color="listening ? 'green' : ''"
+                    >mdi-music-note</v-icon
+                  >
+                </v-btn>
+              </template>
+              <span>Sound anhören</span>
+            </v-tooltip>
+          </template>
 
-        <audio-player
-          :file="audioFile"
-          :sound="sound"
-          @playing="setListening"
-          color="primary"
-          downloadable
-        ></audio-player>
-        <!-- <audio controls>
+          <audio-player
+            :file="audioFile"
+            :sound="sound"
+            @playing="setListening"
+            color="primary"
+            downloadable
+          ></audio-player>
+          <!-- <audio controls>
             <source :src="audioFile">
             Der Browser unterstützt dieses Format nicht
-        </audio>-->
-      </v-menu>
+          </audio>-->
+        </v-menu>
 
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn
-            v-on="on"
-            @click="toggleJoinSound"
-            :loading="changingJoinSound"
-            :color="isJoinSound ? 'primary' : '#c9c9c9'"
-            icon
-          >
-            <v-icon>mdi-location-enter</v-icon>
-          </v-btn>
-        </template>
-        <span>
-          {{ isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen" }}
-        </span>
-      </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              v-on="on"
+              @click="toggleJoinSound"
+              :loading="changingJoinSound"
+              :color="isJoinSound ? 'primary' : '#c9c9c9'"
+              icon
+            >
+              <v-icon>mdi-location-enter</v-icon>
+            </v-btn>
+          </template>
+          <span>
+            {{ isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen" }}
+          </span>
+        </v-tooltip>
+      </div>
+      <v-spacer></v-spacer>
+      <span>{{ commandPrefix }}{{ sound.command }}</span>
     </v-card-title>
-    <v-card-subtitle
-      ><div>{{ sound.description }}</div>
-      <slot name="date"></slot
-    ></v-card-subtitle>
+    <v-card-subtitle>
+      <div>{{ sound.description }}</div>
+      <slot name="date"></slot>
+    </v-card-subtitle>
     <v-card-actions>
       <v-btn :loading="soundPlaying" @click="playSound" color="success" icon>
         <v-icon large>mdi-play</v-icon>
@@ -97,7 +115,7 @@
 </template>
 <script>
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import HotkeyRecorder from "../util/HotkeyRecorder";
 // const HotkeyRecorder = () => import("../util/HotkeyRecorder")
 // if (process.env.VUE_APP_ELECTRON_ENV)
@@ -140,6 +158,7 @@ export default {
     }
   }),
   methods: {
+    ...mapActions(["fetchUser"]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       handleHotkeyUpdate(event, data) {
         if (data) {
@@ -181,6 +200,7 @@ export default {
                     names: recorder.getNamesFromKeys("electron_us"),
                     localeNames: recorder.getNamesFromKeys("de")
                   };
+
                   console.log("register:", register);
                   ipcRenderer.send("store-hotkey", register);
                 })
@@ -295,10 +315,40 @@ export default {
         }
       });
       return;
+    },
+    toggleFavourite() {
+      console.log("toggle favourite sound");
+      this.favouriteLoading = true;
+      const method = this.isFavourite ? "remove" : "add";
+      axios
+        .post(
+          `${process.env.VUE_APP_API_BASE_URL}/api/sounds/favourite/${method}`,
+          { sound: this.sound.id }
+        )
+        .then(() => {
+          switch (method) {
+            case "remove": {
+              this.user.favouriteSounds.splice(
+                this.user.favouriteSounds.indexOf(this.sound.id),
+                1
+              );
+              break;
+            }
+            case "add": {
+              this.user.favouriteSounds.push(this.sound.id);
+              break;
+            }
+          }
+          this.fetchUser();
+        })
+        .catch(err => console.log(err))
+        .finally(() => {
+          this.favouriteLoading = false;
+        });
     }
   },
   computed: {
-    ...mapGetters(["token"]),
+    ...mapGetters(["token", "user"]),
     recording: {
       get() {
         return this.recordingState;
@@ -310,6 +360,12 @@ export default {
     },
     audioFile() {
       return `${process.env.VUE_APP_API_BASE_URL}/api/sounds/listen/${this.sound.id}?token=${this.token}`;
+    },
+    isFavourite() {
+      if (!this.user || !this.user.favouriteSounds) {
+        return false;
+      }
+      return this.user.favouriteSounds.includes(this.sound.id);
     }
   },
   props: {
@@ -328,7 +384,8 @@ export default {
       listening: false,
       changingJoinSound: false,
       hotkeyText: undefined,
-      recordingState: false
+      recordingState: false,
+      favouriteLoading: false
       // recorder: undefined,
     };
   }

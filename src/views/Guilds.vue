@@ -43,85 +43,14 @@
               v-slot:default="{ active, toggle }"
               :value="guild.id"
             >
-              <v-card
-                @click="toggle"
-                class="ma-3 mb-5"
-                :style="active ? 'border: 2px solid orange;' : ''"
-                :color="getPalette(guild.id).first"
-                :elevation="active ? 9 : 2"
-              >
-                <div class="d-flex flex-no-wrap justify-space-around">
-                  <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{
-                      guild.name
-                    }}</v-card-title>
-                    <v-card-subtitle
-                      :style="{ color: getPalette(guild.id).second }"
-                    >
-                      <div>{{ guild.sounds }} Sounds verfügbar</div>
-                      <div class="body-2 font-weight-thin">
-                        <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{ guild.commandPrefix }}
-                        </span>
-                      </div>
-                    </v-card-subtitle>
-                  </div>
-                  <v-avatar class="ma-3" size="75">
-                    <v-img
-                      v-if="guild.icon"
-                      :ref="`img-${guild.id}`"
-                      :src="guild.icon"
-                    ></v-img>
-                  </v-avatar>
-                </div>
-              </v-card>
+              <guild-list-tile
+                :toggle="toggle"
+                :guild="guild"
+                :palette="getPalette(guild.id)"
+                :active="active"
+              ></guild-list-tile>
             </v-slide-item>
           </v-slide-group>
-
-          <!-- <v-row>
-            <v-col v-if="!guilds || guilds.length === 0">
-              <span v-if="fetchingGuilds">
-                Lädt...
-                <v-progress-linear indeterminate color="primary"></v-progress-linear>
-              </span>
-              <span v-else>Kein Server geladen oder vorhanden</span>
-            </v-col>
-            <v-col v-else cols="12" :md="3">
-              <v-card
-                v-for="guild in guilds"
-                :key="guild.id"
-                :class="{ 'mx-3': guild !== activeGuild, 'my-3': true }"
-                :elevation="guild === activeGuild ? 5 : 0"
-                @click="
-                  () => {
-                    activeGuild = guild;
-                  }
-                "
-                :color="getPalette(guild.id).first"
-              >
-                <div class="d-flex flex-no-wrap justify-space-around">
-                  <div :style="{ color: getPalette(guild.id).second }">
-                    <v-card-title class="headline">{{ guild.name }}</v-card-title>
-                    <v-card-subtitle :style="{ color: getPalette(guild.id).second }">
-                      <div>{{ getSoundsOfGuild(guild.id).length }} Sounds verfügbar</div>
-                      <div class="body-2 font-weight-thin">
-                        <span>Kommando-Symbol:</span>
-                        <span class="font-weight-bold">
-                          {{
-                          guild.commandPrefix
-                          }}
-                        </span>
-                      </div>
-                    </v-card-subtitle>
-                  </div>
-                  <v-avatar class="ma-3" :size="guild !== activeGuild ? '75' : '85'">
-                    <v-img v-if="guild.icon" :ref="`img-${guild.id}`" :src="guild.icon"></v-img>
-                  </v-avatar>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>-->
         </v-card-text>
       </v-card>
     </v-col>
@@ -136,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -234,6 +163,10 @@
                     :value="i"
                   ></v-radio>
                 </v-radio-group>
+                <v-checkbox
+                  v-model="favouriteSoundsFirst"
+                  label="Favoriten immer als erstes anzeigen"
+                ></v-checkbox>
               </v-card-text>
             </v-card>
           </v-menu>
@@ -328,6 +261,7 @@ import moment from "moment";
 // import * as Vibrant from "node-vibrant";
 
 import SoundListTile from "../components/SoundListTile";
+import GuildListTile from "../components/GuildListTile";
 
 let ipcRenderer;
 if (process.env.VUE_APP_ELECTRON_ENV) {
@@ -336,7 +270,8 @@ if (process.env.VUE_APP_ELECTRON_ENV) {
 
 export default {
   components: {
-    "sound-list-tile": SoundListTile
+    "sound-list-tile": SoundListTile,
+    "guild-list-tile": GuildListTile
   },
   created() {
     if (!this.guilds || this.guilds.length === 0) {
@@ -442,7 +377,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["fetchGuilds", "fetchSounds"]),
+    ...mapActions(["fetchGuilds", "fetchSounds", "fetchUser"]),
     ...mapMutations(["setGuildSounds"]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       addSoundHotkeys(add) {
@@ -577,10 +512,22 @@ export default {
       } else {
         return moment(sound.createdAt).format("DD.MM.YYYY");
       }
+    },
+    isGuildFavourite(guild) {
+      if (!this.user || !this.user.favouriteGuilds) {
+        return false;
+      }
+      return this.user.favouriteGuilds.includes(guild.id);
+    },
+    isSoundFavourite(sound) {
+      if (!this.user || !this.user.favouriteSounds) {
+        return false;
+      }
+      return this.user.favouriteSounds.includes(sound.id);
     }
   },
   computed: {
-    ...mapGetters(["guilds", "sounds"]),
+    ...mapGetters(["guilds", "sounds", "user"]),
     activeGuild: {
       get() {
         for (const guild of this.guilds) {
@@ -648,8 +595,17 @@ export default {
       }
 
       let sortMethod = this.soundSortings[this.sortMethod];
-
       result = sortMethod.sort(result, this.sortDirection);
+
+      if (this.favouriteSoundsFirst) {
+        let favourites = [];
+        let rest = [];
+        for (const sound of result) {
+          if (this.isSoundFavourite(sound)) favourites.push(sound);
+          else rest.push(sound);
+        }
+        result = favourites.concat(rest);
+      }
 
       return result;
       // TODO
@@ -684,6 +640,19 @@ export default {
         });
       }
 
+      result.sort((a, b) => {
+        const aFav = this.isGuildFavourite(a);
+        const bFav = this.isGuildFavourite(b);
+
+        if (aFav) {
+          if (bFav) return 0;
+          else return -1;
+        } else {
+          if (bFav) return 1;
+          else return 0;
+        }
+      });
+
       return result;
     }
   },
@@ -692,7 +661,6 @@ export default {
       baseUrl: process.env.VUE_APP_API_BASE_URL,
 
       palettes: {},
-      waveSurfer: undefined,
 
       currentSoundPage: 1,
       soundsPerPage: 16,
@@ -712,6 +680,8 @@ export default {
         description: "",
         file: undefined
       },
+
+      favouriteSoundsFirst: false,
       sortDirection: 1,
       sortMethod: 0,
       soundSortings: [
