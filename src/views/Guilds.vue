@@ -145,9 +145,15 @@
               </v-btn>
             </template>
             <v-card>
-              <v-card-title>Sortierung</v-card-title>
-              <v-card-text>
-                <v-btn-toggle v-model="sortDirection" mandatory>
+              <v-card-title>
+                Sortierung
+                <v-btn-toggle
+                  class="ml-auto"
+                  v-model="sortDirection"
+                  mandatory
+                  dense
+                  tile
+                >
                   <v-btn :value="-1" icon>
                     <v-icon>mdi-sort-descending</v-icon>
                   </v-btn>
@@ -155,6 +161,8 @@
                     <v-icon>mdi-sort-ascending</v-icon>
                   </v-btn>
                 </v-btn-toggle>
+              </v-card-title>
+              <v-card-text>
                 <v-radio-group v-model="sortMethod">
                   <v-radio
                     v-for="(item, i) in soundSortings"
