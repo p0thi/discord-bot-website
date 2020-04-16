@@ -65,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -378,7 +378,12 @@ export default {
   },
   methods: {
     ...mapActions(["fetchGuilds", "fetchSounds", "fetchUser"]),
-    ...mapMutations(["setGuildSounds"]),
+    ...mapMutations([
+      "setGuildSounds",
+      "setFavouriteSoundsFirst",
+      "setSortDirection",
+      "setSortMethod"
+    ]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       addSoundHotkeys(add) {
         add.forEach(x => {
@@ -527,7 +532,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["guilds", "sounds", "user"]),
+    ...mapGetters([
+      "guilds",
+      "sounds",
+      "user",
+      "getSortDirection",
+      "getSortMethod",
+      "getFavouriteSoundsFirst"
+    ]),
     activeGuild: {
       get() {
         for (const guild of this.guilds) {
@@ -554,7 +566,6 @@ export default {
       }
     },
     activeGuildSounds() {
-      console.log("getting sounds");
       if (!this.activeGuild) {
         return [];
       }
@@ -594,8 +605,10 @@ export default {
         // console.log("after length", result.length);
       }
 
-      let sortMethod = this.soundSortings[this.sortMethod];
-      result = sortMethod.sort(result, this.sortDirection);
+      let currentSortMethod = this.soundSortings[
+        Math.min(this.sortMethod, this.soundSortings.length - 1)
+      ];
+      result = currentSortMethod.sort(result, this.sortDirection);
 
       if (this.favouriteSoundsFirst) {
         let favourites = [];
@@ -654,6 +667,30 @@ export default {
       });
 
       return result;
+    },
+    favouriteSoundsFirst: {
+      get() {
+        return this.getFavouriteSoundsFirst;
+      },
+      set(value) {
+        this.setFavouriteSoundsFirst(value);
+      }
+    },
+    sortDirection: {
+      get() {
+        return this.getSortDirection;
+      },
+      set(value) {
+        this.setSortDirection(value);
+      }
+    },
+    sortMethod: {
+      get() {
+        return this.getSortMethod;
+      },
+      set(value) {
+        this.setSortMethod(value);
+      }
     }
   },
   data() {
@@ -681,9 +718,9 @@ export default {
         file: undefined
       },
 
-      favouriteSoundsFirst: false,
-      sortDirection: 1,
-      sortMethod: 0,
+      // favouriteSoundsFirst: false,
+      // sortDirection: 1,
+      // sortMethod: 0,
       soundSortings: [
         {
           name: "Alphabetisch",

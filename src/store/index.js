@@ -1,15 +1,35 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import VuexPersistence from "vuex-persist";
 import axios from "axios";
 import AuthHandler from "../util/AuthHandler";
 import router from "../router";
 
 Vue.use(Vuex);
 
+const vuexLocal = new VuexPersistence({
+  storage: window.localStorage,
+  reducer(state) {
+    return {
+      token: state.token,
+      loginStatus: state.loginStatus,
+      sortDirection: state.sortDirection,
+      sortMethod: state.sortMethod,
+      favouriteSoundsFirst: state.favouriteSoundsFirst,
+      route: state.route
+    };
+  }
+});
+
 const store = new Vuex.Store({
+  plugins: [vuexLocal.plugin],
   state: {
+    route: "/",
     loginStatus: "",
-    token: localStorage.getItem("token") || "",
+    token: "",
+    sortDirection: 1,
+    sortMethod: 0,
+    favouriteSoundsFirst: false,
     user: {},
     guilds: [],
     sounds: {}
@@ -20,7 +40,11 @@ const store = new Vuex.Store({
     token: state => state.token,
     user: state => state.user,
     guilds: state => state.guilds,
-    sounds: state => state.sounds
+    sounds: state => state.sounds,
+    getSortDirection: state => state.sortDirection,
+    getSortMethod: state => state.sortMethod,
+    getFavouriteSoundsFirst: state => state.favouriteSoundsFirst,
+    getRoute: state => state.route
   },
   mutations: {
     auth_request(state) {
@@ -35,6 +59,7 @@ const store = new Vuex.Store({
     },
     auth_error(state) {
       state.loginStatus = "error";
+      state.token = "";
     },
     logout(state) {
       state.token = "";
@@ -49,6 +74,18 @@ const store = new Vuex.Store({
     },
     setGuildSounds(state, payload) {
       Vue.set(state.sounds, payload.guildId, payload.sounds);
+    },
+    setFavouriteSoundsFirst(state, payload) {
+      state.favouriteSoundsFirst = payload;
+    },
+    setSortDirection(state, payload) {
+      state.sortDirection = payload;
+    },
+    setSortMethod(state, payload) {
+      state.sortMethod = payload;
+    },
+    setRoute(state, payload) {
+      state.route = payload;
     }
   },
   actions: {
@@ -64,7 +101,7 @@ const store = new Vuex.Store({
               .login(code)
               .then(loginResp => {
                 let token = loginResp.data.token;
-                localStorage.setItem("token", token);
+                // localStorage.setItem("token", token);
                 axios.defaults.headers.common["Authorization"] = token;
                 commit("auth_success", token);
                 const redirect = router.history.current.query.redirect
@@ -77,13 +114,13 @@ const store = new Vuex.Store({
               })
               .catch(err => {
                 commit("auth_error");
-                localStorage.removeItem("token");
+                // localStorage.removeItem("token");
                 reject(err);
               });
           })
           .catch(err => {
             commit("auth_error");
-            localStorage.removeItem("token");
+            // localStorage.removeItem("token");
             reject(err);
           });
       });
@@ -91,7 +128,7 @@ const store = new Vuex.Store({
     logout({ commit }) {
       return new Promise((resolve, reject) => {
         try {
-          localStorage.removeItem("token");
+          // localStorage.removeItem("token");
           delete axios.defaults.headers.common["Authorization"];
           router.push("/");
         } catch (e) {

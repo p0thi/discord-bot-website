@@ -45,4 +45,19 @@ function requireAuth(to, from, next) {
   }
 }
 
+let firstCall = true;
+const waitForStorageToBeReady = async (to, from, next) => {
+  await store.restored;
+
+  if (firstCall) {
+    firstCall = false;
+    const route = store.getters.getRoute || "/";
+    next(route);
+  } else {
+    store.commit("setRoute", to.fullPath);
+    next();
+  }
+};
+router.beforeEach(waitForStorageToBeReady);
+
 export default router;
