@@ -65,8 +65,7 @@
           </span>
         </v-tooltip>
       </div>
-      <v-spacer></v-spacer>
-      <span>{{ commandPrefix }}{{ sound.command }}</span>
+      <span class="mr-auto">{{ commandPrefix }}{{ sound.command }}</span>
     </v-card-title>
     <v-card-subtitle>
       <div>{{ sound.description }}</div>
