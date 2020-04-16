@@ -16,7 +16,8 @@ const vuexLocal = new VuexPersistence({
       sortDirection: state.sortDirection,
       sortMethod: state.sortMethod,
       favouriteSoundsFirst: state.favouriteSoundsFirst,
-      route: state.route
+      route: state.route,
+      filterMethods: state.filterMethods
     };
   }
 });
@@ -30,6 +31,7 @@ const store = new Vuex.Store({
     sortDirection: 1,
     sortMethod: 0,
     favouriteSoundsFirst: true,
+    filterMethods: [],
     user: {},
     guilds: [],
     sounds: {}
@@ -44,7 +46,8 @@ const store = new Vuex.Store({
     getSortDirection: state => state.sortDirection,
     getSortMethod: state => state.sortMethod,
     getFavouriteSoundsFirst: state => state.favouriteSoundsFirst,
-    getRoute: state => state.route
+    getRoute: state => state.route,
+    getFilterMethods: state => state.filterMethods
   },
   mutations: {
     auth_request(state) {
@@ -86,6 +89,9 @@ const store = new Vuex.Store({
     },
     setRoute(state, payload) {
       state.route = payload;
+    },
+    setFilterMethods(state, payload) {
+      state.filterMethods = payload;
     }
   },
   actions: {

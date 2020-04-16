@@ -65,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -138,6 +138,53 @@
             </v-card>
           </v-dialog>
           <v-spacer></v-spacer>
+          <v-menu :close-on-content-click="false">
+            <template v-slot:activator="{ on }">
+              <v-badge
+                :value="filterMethods.length > 0"
+                overlap
+                left
+                :content="filterMethods.length"
+              >
+                <v-btn icon v-on="on">
+                  <v-icon>mdi-filter-menu</v-icon>
+                </v-btn>
+              </v-badge>
+            </template>
+            <v-card>
+              <v-card-title>
+                <span>Filter</span>
+                <span class="ml-auto"
+                  >{{ filterMethods.length }} ausgewählt</span
+                >
+              </v-card-title>
+              <v-list shaped>
+                <v-list-item-group v-model="filterMethods" multiple>
+                  <template v-for="(item, i) in soundFilters">
+                    <v-list-item :key="`filter-${i}`" :value="i">
+                      <template v-slot:default="{ active, toggle }">
+                        <v-list-item-content>
+                          <v-list-item-title
+                            v-text="item.name"
+                          ></v-list-item-title>
+                          <v-list-item-subtitle
+                            v-text="item.description"
+                          ></v-list-item-subtitle>
+                        </v-list-item-content>
+                        <v-list-item-action>
+                          <v-checkbox
+                            :input-value="active"
+                            :true-value="i"
+                            @click="toggle"
+                          ></v-checkbox>
+                        </v-list-item-action>
+                      </template>
+                    </v-list-item>
+                  </template>
+                </v-list-item-group>
+              </v-list>
+            </v-card>
+          </v-menu>
           <v-menu :close-on-content-click="false">
             <template v-slot:activator="{ on }">
               <v-btn color="primary" dark v-on="on" icon>
@@ -391,7 +438,8 @@ export default {
       "setGuildSounds",
       "setFavouriteSoundsFirst",
       "setSortDirection",
-      "setSortMethod"
+      "setSortMethod",
+      "setFilterMethods"
     ]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       addSoundHotkeys(add) {
@@ -547,7 +595,8 @@ export default {
       "user",
       "getSortDirection",
       "getSortMethod",
-      "getFavouriteSoundsFirst"
+      "getFavouriteSoundsFirst",
+      "getFilterMethods"
     ]),
     activeGuild: {
       get() {
@@ -618,6 +667,10 @@ export default {
         Math.min(this.sortMethod, this.soundSortings.length - 1)
       ];
       result = currentSortMethod.sort(result, this.sortDirection);
+
+      for (const index of this.filterMethods) {
+        result = this.soundFilters[index].filter(result, this);
+      }
 
       if (this.favouriteSoundsFirst) {
         let favourites = [];
@@ -700,6 +753,14 @@ export default {
       set(value) {
         this.setSortMethod(value);
       }
+    },
+    filterMethods: {
+      get() {
+        return this.getFilterMethods;
+      },
+      set(value) {
+        this.setFilterMethods(value);
+      }
     }
   },
   data() {
@@ -751,6 +812,34 @@ export default {
               const result = aDate > bDate ? 1 : bDate > aDate ? -1 : 0;
               return direction * result;
             });
+          }
+        }
+      ],
+
+      soundFilters: [
+        {
+          name: "Favoriten",
+          description: "Nur Favoriten anzeigen",
+          filter(list, myThis) {
+            return list.filter(item => {
+              return myThis.isSoundFavourite(item);
+            });
+          }
+        },
+        {
+          name: "Join-Sound",
+          description: "Nur den Join-Sound anzeigen",
+          filter(list, myThis) {
+            return list.filter(item => {
+              return item.id === myThis.activeGuild.joinSound;
+            });
+          }
+        },
+        {
+          name: "Eigene",
+          description: "Nur selbst erstellte anzeigen",
+          filter(list) {
+            return list.filter(item => item.creator);
           }
         }
       ],
