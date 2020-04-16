@@ -48,11 +48,14 @@ function requireAuth(to, from, next) {
 let firstCall = true;
 const waitForStorageToBeReady = async (to, from, next) => {
   await store.restored;
+  console.log(from.fullPath, to.fullPath, firstCall);
 
   if (firstCall) {
     firstCall = false;
     const route = store.getters.getRoute || "/";
-    next(route);
+    console.log(route);
+    if (to.fullPath === route || to.fullPath === "/") next(route);
+    else next();
   } else {
     store.commit("setRoute", to.fullPath);
     next();
