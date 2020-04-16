@@ -246,38 +246,45 @@
           ></v-text-field>
         </v-card-title>
         <v-card-text>
-          <v-row v-if="activeGuild && activeGuildSounds.length > 0">
-            <v-col
-              v-for="(sound, i) in getPaginatedSounds"
-              :key="sound.id + i"
-              cols="12"
-              sm="6"
-              md="4"
-              lg="3"
-            >
-              <sound-list-tile
-                @joinValueChanged="soundJoinValueChanged(sound, $event)"
-                @recordingState="recordingStateChange"
-                @deleted="reload()"
-                :commandPrefix="activeGuild.commandPrefix"
-                :sound="sound"
-                :guildId="activeGuild.id"
-                :editable="sound.creator || activeGuild.owner"
-                :isJoinSound="activeGuild.joinSound === sound.id"
+          <div v-if="activeGuild && activeGuildSounds.length > 0">
+            <v-row v-if="filteredSortedActiveGuildSounds.length > 0">
+              <v-col
+                v-for="(sound, i) in getPaginatedSounds"
+                :key="sound.id + i"
+                cols="12"
+                sm="6"
+                md="4"
+                lg="3"
               >
-                <template v-if="sortMethod === 1" v-slot:date>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                      <div v-on="on" class="caption grey--text">
-                        {{ getFormatedCreationDate(sound) }}
-                      </div>
-                    </template>
-                    <span>{{ getFormatedCreationDate(sound, true) }}</span>
-                  </v-tooltip>
-                </template>
-              </sound-list-tile>
-            </v-col>
-          </v-row>
+                <sound-list-tile
+                  @joinValueChanged="soundJoinValueChanged(sound, $event)"
+                  @recordingState="recordingStateChange"
+                  @deleted="reload()"
+                  :commandPrefix="activeGuild.commandPrefix"
+                  :sound="sound"
+                  :guildId="activeGuild.id"
+                  :editable="sound.creator || activeGuild.owner"
+                  :isJoinSound="activeGuild.joinSound === sound.id"
+                >
+                  <template v-if="sortMethod === 1" v-slot:date>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on" class="caption grey--text">
+                          {{ getFormatedCreationDate(sound) }}
+                        </div>
+                      </template>
+                      <span>{{ getFormatedCreationDate(sound, true) }}</span>
+                    </v-tooltip>
+                  </template>
+                </sound-list-tile>
+              </v-col>
+            </v-row>
+            <v-row v-else>
+              <v-col cols="12"
+                >Für diese Filtereinstellungen gibt es keine Ergebnisse</v-col
+              >
+            </v-row>
+          </div>
           <v-row v-else-if="fetchingSounds">
             <v-progress-linear
               indeterminate
