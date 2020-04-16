@@ -11,15 +11,15 @@
               :loading="favouriteLoading"
               icon
             >
-              <v-icon>
-                {{ isFavourite ? "mdi-star" : "mdi-star-outline" }}
-              </v-icon>
+              <v-icon>{{
+                isFavourite ? "mdi-star" : "mdi-star-outline"
+              }}</v-icon>
             </v-btn>
           </template>
           <span>{{ isFavourite ? "Favorit entfernen" : "Favorisieren" }}</span>
         </v-tooltip>
 
-        <v-menu top :close-on-content-click="false">
+        <v-menu v-model="playerMenu" top :close-on-content-click="false">
           <template v-slot:activator="{ on: menu }">
             <v-tooltip bottom>
               <template v-slot:activator="{ on: tooltip }">
@@ -36,7 +36,9 @@
           </template>
 
           <audio-player
+            v-if="playerMenu"
             :file="audioFile"
+            :autoPlay="true"
             :sound="sound"
             @playing="setListening"
             color="primary"
@@ -60,9 +62,9 @@
               <v-icon>mdi-location-enter</v-icon>
             </v-btn>
           </template>
-          <span>
-            {{ isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen" }}
-          </span>
+          <span>{{
+            isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen"
+          }}</span>
         </v-tooltip>
       </div>
       <span class="mr-auto">{{ commandPrefix }}{{ sound.command }}</span>
@@ -384,7 +386,8 @@ export default {
       changingJoinSound: false,
       hotkeyText: undefined,
       recordingState: false,
-      favouriteLoading: false
+      favouriteLoading: false,
+      playerMenu: false
       // recorder: undefined,
     };
   }
