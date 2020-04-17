@@ -65,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -484,13 +484,31 @@ export default {
                 console.log("sound played", e);
               });
           });
+          ipcRenderer.on(`listening-sound-${x.id}`, (event, data) => {
+            if (data) {
+              if (!this.listeningSoundIds.includes(x.id)) {
+                this.listeningSoundIds.push(x.id);
+              }
+            } else {
+              const index = this.listeningSoundIds.indexOf(x.id);
+              if (index >= 0) {
+                this.listeningSoundIds.splice(index, 1);
+              }
+            }
+          });
           ipcRenderer.send("add-sound-listener", x);
         });
       },
       removeSoundHotkeys(remove) {
         remove.forEach(x => {
           ipcRenderer.removeAllListeners(`shortcut-triggered-${x.id}`);
+          ipcRenderer.removeAllListeners(`listening-sound-${x.id}`);
           ipcRenderer.send("remove-sound-listener", x);
+
+          const index = this.listeningSoundIds.indexOf(x.id);
+          if (index >= 0) {
+            this.listeningSoundIds.splice(index, 1);
+          }
         });
       }
     }),
@@ -772,6 +790,9 @@ export default {
   },
   data() {
     return {
+      ...(process.env.VUE_APP_ELECTRON_ENV && {
+        listeningSoundIds: []
+      }),
       baseUrl: process.env.VUE_APP_API_BASE_URL,
 
       palettes: {},
@@ -824,6 +845,19 @@ export default {
       ],
 
       soundFilters: [
+        ...(process.env.VUE_APP_ELECTRON_ENV
+          ? [
+              {
+                name: "Hotkeys",
+                description: "Nur Hotkeys anzeigen",
+                filter(list, myThis) {
+                  return list.filter(item => {
+                    return myThis.listeningSoundIds.includes(item.id);
+                  });
+                }
+              }
+            ]
+          : []),
         {
           name: "Favoriten",
           description: "Nur Favoriten anzeigen",

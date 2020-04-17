@@ -72,24 +72,26 @@ ipcMain.on("remove-sound-listener", (event, data) => {
 });
 
 ipcMain.on("add-sound-listener", (event, data) => {
-  listen(event, data);
-  // console.log("add", data.command)
+  const registered = listen(event, data);
+  sendHotkeyUpdate(event, data.id, registered);
+  // event.sender.send(`listening-sound-${data.id}`, registered);
 });
 
 const listen = (event, sound) => {
   if (!sound || !sound.id) {
-    return;
+    return false;
   }
   const settings = store.get(`hotkeys.${sound.id}`);
   console.log("try to listen to", settings);
   if (!settings) {
-    return;
+    return false;
   }
   console.log("now listening to", settings.accelerator);
   globalShortcut.register(settings.accelerator, () => {
     console.log("hotkey detected:", settings.accelerator);
     event.sender.send(`shortcut-triggered-${sound.id}`, sound);
   });
+  return settings.localeNames;
 };
 
 const unlisten = (event, sound) => {
@@ -103,6 +105,7 @@ const unlisten = (event, sound) => {
 
 const sendHotkeyUpdate = (event, id, data) => {
   event.sender.send(`hotkey-updated-${id}`, data);
+  event.sender.send(`listening-sound-${id}`, !!data);
 };
 
 ipcMain.on("store-hotkey", (event, data) => {
