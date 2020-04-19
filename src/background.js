@@ -16,10 +16,18 @@ import {
 } from "vue-cli-plugin-electron-builder/lib";
 import { autoUpdater } from "electron-updater";
 const nodeUrl = require("url");
-const store = require("electron-settings");
+const Store = require("electron-store");
 const path = require("path");
 const icon = path.join(__static, "icon.png");
 const gotTheLock = app.requestSingleInstanceLock();
+
+const store = new Store({
+  migrations: {
+    "0.1.5": store => {
+      store.delete("hotkeys");
+    }
+  }
+});
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -58,8 +66,8 @@ ipcMain.on("download-update", () => {
 
 ipcMain.on("get-hotkeys", (event, data) => {
   let result = {};
-  const settings = store.get(`hotkeys.${data.id}`);
-  if (settings) {
+  if (store.has(`hotkeys.${data.guild}.${data.id}`)) {
+    const settings = store.get(`hotkeys.${data.guild}.${data.id}`);
     result.hotkeys = settings.localeNames;
   }
   event.sender.send(`send-hotkeys-${data.id}`, result);
@@ -101,11 +109,12 @@ const listen = (event, sound) => {
   if (!sound || !sound.id) {
     return false;
   }
-  const settings = store.get(`hotkeys.${sound.id}`);
-  console.log("try to listen to", settings);
-  if (!settings) {
+  if (!store.has(`hotkeys.${sound.guild}.${sound.id}`)) {
     return false;
   }
+  const settings = store.get(`hotkeys.${sound.guild}.${sound.id}`);
+
+  console.log("try to listen to", settings);
   console.log("now listening to", settings.accelerator);
   globalShortcut.register(settings.accelerator, () => {
     console.log("hotkey detected:", settings.accelerator);
@@ -115,11 +124,11 @@ const listen = (event, sound) => {
 };
 
 const unlisten = (event, sound) => {
-  const settings = store.get(`hotkeys.${sound.id}`);
-  console.log("unlisten", settings);
-  if (!settings) {
+  if (!store.has(`hotkeys.${sound.guild}.${sound.id}`)) {
     return;
   }
+  const settings = store.get(`hotkeys.${sound.guild}.${sound.id}`);
+  console.log("unlisten", settings);
   globalShortcut.unregister(settings.accelerator);
 };
 
@@ -129,6 +138,7 @@ const sendHotkeyUpdate = (event, id, data) => {
 };
 
 ipcMain.on("store-hotkey", (event, data) => {
+  console.log("BAUM");
   const modifiedReferenceSet = new Set([
     "Cmd",
     "Ctrl",
@@ -151,6 +161,7 @@ ipcMain.on("store-hotkey", (event, data) => {
   //     return;
   //   }
   // }
+
   for (let i = 0; i < data.names.length; i++) {
     if (modifiedReferenceSet.has(data.names[i])) {
       modifiers.add(data.names[i]);
@@ -159,12 +170,14 @@ ipcMain.on("store-hotkey", (event, data) => {
     }
   }
   if (modifiers.size < 1) {
+    console.log("modifier error");
     data.error =
       "Du brauchst mindestens einen modifier (Strg/Cmd, Alt, Shift...)";
     event.sender.send("store-hotkey-response-" + data.id, data);
     return;
   }
   if (keyCodes.size < 1) {
+    console.log("key error");
     data.error =
       "Du brauchst mindestens einen weitern Schlüssel (Buchstaben, Zahlen...).";
     event.sender.send("store-hotkey-response-" + data.id, data);
@@ -176,18 +189,43 @@ ipcMain.on("store-hotkey", (event, data) => {
   if (globalShortcut.isRegistered(shortcutString)) {
     data.error = "Dieses Tastenkürzel wird bereits verwendet";
     event.sender.send("store-hotkey-response-" + data.id, data);
-  } else {
-    store.set("hotkeys." + data.id, {
-      id: data.id,
-      accelerator: shortcutString,
-      keys: data.keys,
-      names: data.names,
-      localeNames: data.localeNames
-    });
-    listen(event, data);
-    event.sender.send("store-hotkey-response-" + data.id, data);
-    sendHotkeyUpdate(event, data.id, data.localeNames);
+    return;
   }
+
+  const allGuildHotkeys = store.get(`hotkeys.${data.guild}`);
+  if (allGuildHotkeys) {
+    console.log("chekcing intersections");
+    for (const id in allGuildHotkeys) {
+      const hotkey = allGuildHotkeys[id];
+
+      let counter = 0;
+      for (const key of hotkey.keys) {
+        if (data.keys.includes(key)) {
+          counter++;
+        }
+      }
+
+      if (counter >= hotkey.keys.length || counter >= data.keys.length) {
+        console.log("intersection error");
+        data.error =
+          "Dieses Tastenkürzel überschneidet sich (Teilweise) mit einem anderen.";
+        event.sender.send("store-hotkey-response-" + data.id, data);
+        return;
+      }
+    }
+  }
+
+  store.set(`hotkeys.${data.guild}.${data.id}`, {
+    id: data.id,
+    guild: data.guild,
+    accelerator: shortcutString,
+    keys: data.keys,
+    names: data.names,
+    localeNames: data.localeNames
+  });
+  listen(event, data);
+  event.sender.send("store-hotkey-response-" + data.id, data);
+  sendHotkeyUpdate(event, data.id, data.localeNames);
 });
 
 ipcMain.on("delete-hotkey", (event, data) => {
@@ -195,11 +233,11 @@ ipcMain.on("delete-hotkey", (event, data) => {
     event.sender.send("delete-hotkey-response", { error: "Hotkey not set." });
     return;
   }
-  const settings = store.get(`hotkeys.${data.id}`);
+  const settings = store.get(`hotkeys.${data.guild}.${data.id}`);
   if (globalShortcut.isRegistered(settings.accelerator)) {
     unlisten(event, data);
   }
-  store.delete(`hotkeys.${data.id}`);
+  store.delete(`hotkeys.${data.guild}.${data.id}`);
   event.sender.send("delete-hotkey-response-" + data.id, data);
   sendHotkeyUpdate(event, data.id, undefined);
 });

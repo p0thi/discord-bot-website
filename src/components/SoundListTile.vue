@@ -11,9 +11,9 @@
               :loading="favouriteLoading"
               icon
             >
-              <v-icon>{{
-                isFavourite ? "mdi-star" : "mdi-star-outline"
-              }}</v-icon>
+              <v-icon>
+                {{ isFavourite ? "mdi-star" : "mdi-star-outline" }}
+              </v-icon>
             </v-btn>
           </template>
           <span>{{ isFavourite ? "Favorit entfernen" : "Favorisieren" }}</span>
@@ -62,9 +62,9 @@
               <v-icon>mdi-location-enter</v-icon>
             </v-btn>
           </template>
-          <span>{{
-            isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen"
-          }}</span>
+          <span>
+            {{ isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen" }}
+          </span>
         </v-tooltip>
       </div>
       <span class="mr-auto">{{ commandPrefix }}{{ sound.command }}</span>
@@ -137,6 +137,7 @@ export default {
   ...(process.env.VUE_APP_ELECTRON_ENV && {
     created() {
       ipcRenderer.once(`send-hotkeys-${this.sound.id}`, (event, data) => {
+        console.log("data", data);
         if (data.error) {
           return;
         }
@@ -188,6 +189,7 @@ export default {
                   ipcRenderer.once(
                     `store-hotkey-response-${this.sound.id}`,
                     (event, data) => {
+                      console.log("data##", data);
                       if (data.error) {
                         reject(data.error);
                       } else {
@@ -197,15 +199,20 @@ export default {
                   );
                   const register = {
                     id: this.sound.id,
+                    guild: this.guildId,
                     keys: keys.sort(),
                     names: recorder.getNamesFromKeys("electron_us"),
                     localeNames: recorder.getNamesFromKeys("de")
                   };
+                  console.log("'BAUM", register);
 
                   console.log("register:", register);
                   ipcRenderer.send("store-hotkey", register);
                 })
-                .catch(() => reject());
+                .catch(e => {
+                  console.log(e);
+                  reject("error importing electron");
+                });
             }).catch(e => {
               this.hotkeyText = undefined;
               this.$toast.error(e, {
