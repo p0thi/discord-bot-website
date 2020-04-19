@@ -19,8 +19,9 @@ export default function setup(vue) {
           );
           break;
         case 429: {
+          let hint = err.response.data.message;
           vue.$toast.error(
-            "<b>SPAMSCHUTZ:</b><br>Du musst warten, bevor du weitere Befehle senden kannst",
+            `<b>SPAMSCHUTZ:</b><br>Du musst warten, bevor du weitere Befehle senden kannst<br>${hint}`,
             {
               dismissable: true,
               queueable: false
