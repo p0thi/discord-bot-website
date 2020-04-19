@@ -19,6 +19,26 @@ const nodeUrl = require("url");
 const store = require("electron-settings");
 const path = require("path");
 const icon = path.join(__static, "icon.png");
+const gotTheLock = app.requestSingleInstanceLock();
+
+// Keep a global reference of the window object, if you don't, the window will
+// be closed automatically when the JavaScript object is garbage collected.
+let win;
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (win) {
+      win.show();
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+
+  // Create myWindow, load the rest of the app, etc...
+  app.whenReady().then(() => {});
+}
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 let appTray;
@@ -249,10 +269,6 @@ function auth(event, uri) {
     onCallback(targetUrl);
   });
 }
-
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-let win;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([

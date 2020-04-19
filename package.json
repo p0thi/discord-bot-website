@@ -1,7 +1,7 @@
 {
   "name": "discord-bot-website",
   "description": "Manager for the Pothi-Bot on discord",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Pascal Pothmann",
   "private": true,
   "scripts": {

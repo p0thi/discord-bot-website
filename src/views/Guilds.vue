@@ -6,7 +6,6 @@
           <span>Server auswählen</span>
           <v-spacer></v-spacer>
           <v-text-field
-            class="mx-4"
             v-model="guildSearchString"
             flat
             hide-details
@@ -57,7 +56,7 @@
 
     <v-col v-if="activeGuild" cols="12">
       <v-card v-if="filteredSortedGuilds.length > 0" outlined>
-        <v-card-title>
+        <v-card-title class="sounds-title">
           <span>
             <v-avatar
               :color="!activeGuild.icon ? 'primary' : 'none'"
@@ -65,14 +64,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>
-                {{ activeGuild.name.toUpperCase().charAt(0) }}
-              </span>
+              <span style="color: white" v-else>{{
+                activeGuild.name.toUpperCase().charAt(0)
+              }}</span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">{{
-            activeGuild.name
-          }}</span>
+          <span v-if="!!activeGuild" class="display-1">
+            {{ activeGuild.name }}
+          </span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -138,17 +137,23 @@
             </v-card>
           </v-dialog>
           <v-spacer></v-spacer>
+
           <v-menu :close-on-content-click="false">
-            <template v-slot:activator="{ on }">
+            <template v-slot:activator="{ on: menu }">
               <v-badge
                 :value="filterMethods.length > 0"
                 overlap
                 left
                 :content="filterMethods.length"
               >
-                <v-btn icon v-on="on">
-                  <v-icon>mdi-filter-menu</v-icon>
-                </v-btn>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on: tooltip }">
+                    <v-btn icon v-on="{ ...menu, ...tooltip }">
+                      <v-icon>mdi-filter-menu</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Sounds filtern</span>
+                </v-tooltip>
               </v-badge>
             </template>
             <v-card>
@@ -186,10 +191,20 @@
             </v-card>
           </v-menu>
           <v-menu :close-on-content-click="false">
-            <template v-slot:activator="{ on }">
-              <v-btn color="primary" dark v-on="on" icon>
-                <v-icon>mdi-sort-variant</v-icon>
-              </v-btn>
+            <template v-slot:activator="{ on: menu }">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on: tooltip }">
+                  <v-btn
+                    color="primary"
+                    dark
+                    v-on="{ ...menu, ...tooltip }"
+                    icon
+                  >
+                    <v-icon>mdi-sort-variant</v-icon>
+                  </v-btn>
+                </template>
+                <span>Sounds sortieren</span>
+              </v-tooltip>
             </template>
             <v-card>
               <v-card-title>
@@ -227,8 +242,14 @@
           </v-menu>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon @click="playRandom">
-                <v-icon>mdi-shuffle-variant</v-icon>
+              <v-btn
+                :loading="randomPlaying"
+                v-on="on"
+                icon
+                @click="playRandom"
+                color="success"
+              >
+                <v-icon>mdi-clipboard-play-multiple-outline</v-icon>
               </v-btn>
             </template>
             <span>Zufälligen Sound spielen</span>
@@ -250,7 +271,6 @@
           </v-tooltip>
 
           <v-text-field
-            class="mx-4"
             v-model="soundSearchString"
             flat
             hide-details
@@ -540,12 +560,16 @@ export default {
       });
     },
     playRandom() {
+      if (this.randomPlaying) {
+        return;
+      }
+      this.randomPlaying = true;
       axios
         .get(`${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`, {
           params: {
             id: "random",
-            guild: this.activeGuild.id,
-            block: false
+            guild: this.activeGuild.id
+            // block: false
           },
           timeout: 40000
         })
@@ -563,6 +587,9 @@ export default {
                 break;
             }
           }
+        })
+        .finally(() => {
+          this.randomPlaying = false;
         });
     },
     recordingStateChange(value) {
@@ -838,6 +865,8 @@ export default {
 
       palettes: {},
 
+      randomPlaying: false,
+
       currentSoundPage: 1,
       soundsPerPage: 16,
       soundSearchString: "",
@@ -948,3 +977,10 @@ export default {
   }
 };
 </script>
+<style lang="scss">
+.sounds-title {
+  > * {
+    margin: 0.4rem 0;
+  }
+}
+</style>
