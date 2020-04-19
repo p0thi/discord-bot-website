@@ -65,14 +65,14 @@
               size="50"
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
-              <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
-              }}</span>
+              <span style="color: white" v-else>
+                {{ activeGuild.name.toUpperCase().charAt(0) }}
+              </span>
             </v-avatar>
           </span>
-          <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
-          </span>
+          <span v-if="!!activeGuild" class="display-1">{{
+            activeGuild.name
+          }}</span>
           <v-spacer></v-spacer>
 
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
@@ -225,15 +225,30 @@
               </v-card-text>
             </v-card>
           </v-menu>
-          <v-btn
-            :loading="fetchingGuilds"
-            large
-            @click="reload"
-            class="mr-5"
-            icon
-          >
-            <v-icon>mdi-refresh</v-icon>
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click="playRandom">
+                <v-icon>mdi-shuffle-variant</v-icon>
+              </v-btn>
+            </template>
+            <span>Zufälligen Sound spielen</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                :loading="fetchingGuilds"
+                v-on="on"
+                large
+                @click="reload"
+                class="mr-5"
+                icon
+              >
+                <v-icon>mdi-refresh</v-icon>
+              </v-btn>
+            </template>
+            <span>Sounds neu laden</span>
+          </v-tooltip>
+
           <v-text-field
             class="mx-4"
             v-model="soundSearchString"
@@ -523,6 +538,32 @@ export default {
         this.fetchingGuilds = false;
         this.fetchingSounds = false;
       });
+    },
+    playRandom() {
+      axios
+        .get(`${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`, {
+          params: {
+            id: "random",
+            guild: this.activeGuild.id,
+            block: false
+          },
+          timeout: 40000
+        })
+        .catch(e => {
+          if (e.response) {
+            switch (e.response.status) {
+              case 409:
+                this.$toast.error(
+                  "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
+                  {
+                    dismissable: true,
+                    queueable: true
+                  }
+                );
+                break;
+            }
+          }
+        });
     },
     recordingStateChange(value) {
       if (value) {
