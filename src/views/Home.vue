@@ -6,7 +6,7 @@
           <v-card-title class="title">
             <span class="mr-5">Bot jetzt zu discord Server hinzufügen</span>
             <v-btn
-              href="https://discordapp.com/oauth2/authorize?client_id=185547264838598656&scope=bot&permissions=36830272"
+              href="https://discord.com/oauth2/authorize?client_id=185547264838598656&scope=bot&permissions=36830272"
               target="_blank"
               large
               color="primary"

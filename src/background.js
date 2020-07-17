@@ -246,7 +246,7 @@ ipcMain.on("discord-oauth", auth);
 
 let authWindow;
 function auth(event, uri) {
-  // const uri = 'https://discordapp.com/oauth2/authorize' +
+  // const uri = 'https://discord.com/oauth2/authorize' +
   //   '?response_type=code&client_id=185542328218288128' +
   //   '&redirect_uri=http://localhost/callback&scope=email%20identify&state=baum';
   if (!authWindow) {

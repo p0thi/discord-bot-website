@@ -6,7 +6,7 @@ if (process.env.VUE_APP_ELECTRON_ENV) {
 }
 
 const CLIENT_ID = process.env.VUE_APP_CLIENT_ID;
-const BASE_URL = "https://discordapp.com/oauth2/authorize";
+const BASE_URL = "https://discord.com/oauth2/authorize";
 const REDIRECT_URL = process.env.VUE_APP_ELECTRON_ENV
   ? "http://localhost/api/auth/callback"
   : `${process.env.VUE_APP_API_BASE_URL}/api/auth/callback`;
