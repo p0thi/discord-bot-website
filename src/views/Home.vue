@@ -24,8 +24,8 @@
         <v-card>
           <v-card-title class="title">
             <span
-              >Download desktop software with hotkey function now <br />(Only in
-              german!)</span
+              >Download desktop software with hotkey function now
+              <br />(Currently only german keyboard layout!)</span
             >
             <v-btn
               href="https://github.com/p0thi/discord-bot-website/releases"
