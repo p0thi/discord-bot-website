@@ -41,7 +41,7 @@
       </span>
 
       <v-btn v-else @click="login" text>
-        <span class="mr-2">Login mit discord</span>
+        <span class="mr-2">Login with discord</span>
         <v-progress-circular
           :size="30"
           :width="3"
@@ -54,7 +54,7 @@
       <template v-slot:extension>
         <v-tabs align-with-title>
           <v-tab to="/">Home</v-tab>
-          <v-tab to="/guilds">Meine Discord Server</v-tab>
+          <v-tab to="/guilds">My Discord Servers</v-tab>
           <!-- <v-tab v-if="isLoggedIn">Einstellungen</v-tab> -->
         </v-tabs>
       </template>
@@ -67,10 +67,10 @@
         class="primary--text"
       >
         <span v-if="updateAvailable && !updating && !updateFinished"
-          >Neuere Version verfügbar</span
+          >New Version available</span
         >
 
-        <span v-if="updating && !updateProgress">Wird vorbereitet...</span>
+        <span v-if="updating && !updateProgress">Preparing...</span>
 
         <div v-if="updateProgress && !updateFinished">
           <v-row style="width: 95vw">
@@ -95,7 +95,7 @@
           </v-row>
         </div>
 
-        <span v-if="updateFinished">Update abgeschlossen</span>
+        <span v-if="updateFinished">Update finished</span>
 
         <template
           v-if="updateFinished || updateAvailable"
@@ -105,26 +105,26 @@
             v-if="updateAvailable && !updating && !updateFinished"
             text
             @click="openReleases"
-            >Manuell herunterladen</v-btn
+            >Download manually</v-btn
           >
           <v-btn
             v-if="updateAvailable && !updating && !updateFinished"
             text
             @click="install"
-            >Neue Version Installieren</v-btn
+            >Install new version</v-btn
           >
           <v-btn
             v-if="updateAvailable && !updating && !updateFinished"
             text
             @click="dismiss"
-            >Nicht jetzt</v-btn
+            >Not now</v-btn
           >
 
           <v-btn v-if="updateFinished" text @click="restartApp"
-            >Jetzt installieren</v-btn
+            >Install now</v-btn
           >
           <v-btn v-if="updateFinished" text @click="dismiss"
-            >Später neu starten</v-btn
+            >Restart later</v-btn
           >
         </template>
       </v-banner>

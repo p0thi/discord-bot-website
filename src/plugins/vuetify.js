@@ -8,8 +8,8 @@ import VuetifyToast from "vuetify-toast-snackbar";
 
 Vue.use(VuetifyConfirm, {
   Vuetify,
-  buttonTrueText: "Annehmen",
-  buttonFalseText: "Ablehnen",
+  buttonTrueText: "Confirm",
+  buttonFalseText: "Decline",
   color: "warning",
   icon: "mdi-alert",
   title: "Warnung",
@@ -34,7 +34,7 @@ Vue.use(VuetifyToast, {
 export default new Vuetify({
   lang: {
     locales: { de },
-    current: "de"
+    current: "en"
   },
   theme: {
     themes: {

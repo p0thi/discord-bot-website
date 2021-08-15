@@ -17,10 +17,10 @@
       <div :style="{ color: palette.second }">
         <v-card-title class="headline">{{ guild.name }}</v-card-title>
         <v-card-subtitle :style="{ color: palette.second }">
-          <div>{{ guild.sounds }} Sounds verfügbar</div>
+          <div>{{ guild.sounds }} sounds available</div>
           <div class="body-2 font-weight-thin">
-            <span>Kommando-Symbol:</span>
-            <span class="font-weight-bold">{{ guild.commandPrefix }}</span>
+            <span>Command prefix:</span>
+            <span class="font-weight-bold ml-2">{{ guild.commandPrefix }}</span>
           </div>
         </v-card-subtitle>
       </div>
@@ -47,14 +47,14 @@
           </template>
 
           <v-card>
-            <v-card-title>Einstellungen: {{ guild.name }}</v-card-title>
+            <v-card-title>Settings: {{ guild.name }}</v-card-title>
             <v-form ref="settingsForm">
               <v-card-text>
                 <v-select
                   v-model="commandPrefix"
-                  label="Kommando-Symbol"
+                  label="Command prefix"
                   persistent-hint
-                  hint="Zeichen, mit dem Befehle im discord Chat beginnen"
+                  hint="Character used to begin commands in discord chat"
                   :items="validPrefixes"
                   required
                   dense
@@ -62,8 +62,8 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn @click="abortSettings" color="red" text>Abbrechen</v-btn>
-                <v-btn @click="saveSettings" text>Speichern</v-btn>
+                <v-btn @click="abortSettings" color="red" text>Cancel</v-btn>
+                <v-btn @click="saveSettings" text>Save</v-btn>
               </v-card-actions>
             </v-form>
           </v-card>
@@ -99,7 +99,7 @@ export default {
         })
         .catch(err => {
           this.$toast.error(
-            `Einstellungen konnten nicht gespeichert werden: ${err.response.data.message}`,
+            `Settings could not be saved: ${err.response.data.message}`,
             {
               dismissable: true
             }

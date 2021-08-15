@@ -3,13 +3,13 @@
     <v-col cols="12">
       <v-card outlined>
         <v-card-title>
-          <span>Server auswählen</span>
+          <span>Select server</span>
           <v-spacer></v-spacer>
           <v-text-field
             v-model="guildSearchString"
             flat
             hide-details
-            label="Suchen"
+            label="Search"
             clearable
             prepend-inner-icon="mdi-magnify"
             solo-inverted
@@ -24,16 +24,16 @@
             "
           >
             <span v-if="fetchingGuilds">
-              Lädt...
+              Loading...
               <v-progress-linear
                 indeterminate
                 color="primary"
               ></v-progress-linear>
             </span>
             <span v-else-if="filteredSortedGuilds.length === 0"
-              >Zu dieser Suche wurde kein Server gefunden</span
+              >No server found for this search query</span
             >
-            <span v-else>Kein Server geladen oder vorhanden</span>
+            <span v-else>No servers available or loaded</span>
           </v-col>
           <v-slide-group v-else v-model="slide" show-arrows mandatory>
             <v-slide-item
@@ -77,7 +77,7 @@
           <v-dialog v-model="addSoundDialog" persistent max-width="600px">
             <template v-slot:activator="{ on }">
               <v-btn color="primary" dark v-on="on">
-                Sound Hinzufügen
+                Add sound
                 <v-icon>mdi-plus</v-icon>
               </v-btn>
             </template>
@@ -87,17 +87,17 @@
                 @submit.prevent="submitUploadSoundForm"
               >
                 <v-card-title>
-                  <span class="headline">Neuen Sound hinzufügen</span>
+                  <span class="headline">Add new sound</span>
                 </v-card-title>
                 <v-card-text>
                   <v-text-field
                     counter
                     class="mb-5"
                     :rules="validationRules.command"
-                    placeholder="Befehl"
+                    placeholder="Command"
                     v-model="addSoundFormData.command"
                     :hint="
-                      `Befehl ohne ${activeGuild.commandPrefix} am Anfang eingeben`
+                      `Write command without ${activeGuild.commandPrefix} at the beginning`
                     "
                     required
                   >
@@ -110,11 +110,11 @@
                     :rules="validationRules.description"
                     filled
                     v-model="addSoundFormData.description"
-                    placeholder="Beschreibung für den Sound"
+                    placeholder="Description of the sound"
                     required
                   ></v-textarea>
                   <v-file-input
-                    placeholder="Datei auswählen"
+                    placeholder="Select sound file"
                     show-size
                     v-model="addSoundFormData.file"
                     accept="audio/flac, audio/mp3"
@@ -127,11 +127,9 @@
                     color="blue darken-1"
                     text
                     @click="closeUploadSoundDialog"
-                    >Schließen</v-btn
+                    >Close</v-btn
                   >
-                  <v-btn color="blue darken-1" text type="submit"
-                    >Speichern</v-btn
-                  >
+                  <v-btn color="blue darken-1" text type="submit">Save</v-btn>
                 </v-card-actions>
               </v-form>
             </v-card>
@@ -152,16 +150,14 @@
                       <v-icon>mdi-filter-menu</v-icon>
                     </v-btn>
                   </template>
-                  <span>Sounds filtern</span>
+                  <span>Filter sounds</span>
                 </v-tooltip>
               </v-badge>
             </template>
             <v-card>
               <v-card-title>
                 <span>Filter</span>
-                <span class="ml-auto"
-                  >{{ filterMethods.length }} ausgewählt</span
-                >
+                <span class="ml-auto">{{ filterMethods.length }} selected</span>
               </v-card-title>
               <v-list shaped>
                 <v-list-item-group v-model="filterMethods" multiple>
@@ -203,12 +199,12 @@
                     <v-icon>mdi-sort-variant</v-icon>
                   </v-btn>
                 </template>
-                <span>Sounds sortieren</span>
+                <span>Sort sounds</span>
               </v-tooltip>
             </template>
             <v-card>
               <v-card-title>
-                Sortierung
+                Order
                 <v-btn-toggle
                   class="ml-auto"
                   v-model="sortDirection"
@@ -235,7 +231,7 @@
                 </v-radio-group>
                 <v-checkbox
                   v-model="favouriteSoundsFirst"
-                  label="Favoriten immer als erstes anzeigen"
+                  label="Always show favorites first"
                 ></v-checkbox>
               </v-card-text>
             </v-card>
@@ -252,7 +248,7 @@
                 <v-icon>mdi-clipboard-play-multiple-outline</v-icon>
               </v-btn>
             </template>
-            <span>Zufälligen Sound spielen</span>
+            <span>Play random sound</span>
           </v-tooltip>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
@@ -267,14 +263,14 @@
                 <v-icon>mdi-refresh</v-icon>
               </v-btn>
             </template>
-            <span>Sounds neu laden</span>
+            <span>Refresh sounds</span>
           </v-tooltip>
 
           <v-text-field
             v-model="soundSearchString"
             flat
             hide-details
-            label="Suchen"
+            label="Search"
             clearable
             prepend-inner-icon="mdi-magnify"
             solo-inverted
@@ -316,7 +312,7 @@
             </v-row>
             <v-row v-else>
               <v-col cols="12"
-                >Für diese Filtereinstellungen gibt es keine Ergebnisse</v-col
+                >There are no results for these filter settings</v-col
               >
             </v-row>
           </div>
@@ -327,7 +323,7 @@
             ></v-progress-linear>
           </v-row>
           <v-row v-else>
-            <v-col>Bisher keine Sounds verfügbar</v-col>
+            <v-col>No sounds available yet</v-col>
           </v-row>
           <v-row v-if="paginationLength > 1">
             <v-col>
@@ -342,7 +338,7 @@
         </v-card-text>
       </v-card>
       <v-card v-else>
-        <v-card-text>Kein Server ausgewählt</v-card-text>
+        <v-card-text>No server selected</v-card-text>
       </v-card>
     </v-col>
     <v-col v-else cols="9"></v-col>
@@ -505,7 +501,7 @@ export default {
                   switch (e.response.status) {
                     case 409:
                       this.$toast.error(
-                        "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
+                        "You are not in any channel on this server that the bot can reach.",
                         {
                           dismissable: true,
                           queueable: true
@@ -578,7 +574,7 @@ export default {
             switch (e.response.status) {
               case 409:
                 this.$toast.error(
-                  "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
+                  "You are not in any channel on this server that the bot can reach.",
                   {
                     dismissable: true,
                     queueable: true
@@ -642,14 +638,14 @@ export default {
           console.log(res);
           this.addSoundDialog = false;
           this.$toast.success(
-            `Befehl <b>${this.addSoundFormData.command}</b> erfolgreich gespeichert.`
+            `Command <b>${this.addSoundFormData.command}</b> saved successfully.`
           );
           this.reload();
           this.$refs.addSoundForm.reset();
         })
         .catch(e => {
           this.$toast.error(
-            `Befehl konnte nicht gespeichert werden: <b>${e.response.data.message}</b>`
+            `Command could not be saved: <b>${e.response.data.message}</b>`
           );
         });
     },
@@ -661,11 +657,11 @@ export default {
       return sounds || [];
     },
     getFormatedCreationDate(sound, long = false) {
-      moment.locale("de");
+      moment.locale("en");
       if (long) {
-        return moment(sound.createdAt).format("ddd Do MMMM YYYY - HH:mm [Uhr]");
+        return moment(sound.createdAt).format("ddd Do MMMM YYYY - HH:mm");
       } else {
-        return moment(sound.createdAt).format("DD.MM.YYYY");
+        return moment(sound.createdAt).format("DD. MMMM YYYY");
       }
     },
     isGuildFavourite(guild) {
@@ -891,8 +887,8 @@ export default {
       // sortMethod: 0,
       soundSortings: [
         {
-          name: "Alphabetisch",
-          description: "Sortiert die Einträge in alphabetischer Reihenfolge",
+          name: "Alphabetical",
+          description: "Sorts the entries in alphabetical order",
           sort(list, direction) {
             return list.sort(
               (a, b) => direction * a.command.localeCompare(b.command)
@@ -900,8 +896,8 @@ export default {
           }
         },
         {
-          name: "Erstellungsdatum",
-          description: "Sortiert die Einträge nach Erstellungsdatum",
+          name: "Creation Date",
+          description: "Sorts the entries by creation date",
           sort(list, direction) {
             return list.sort((a, b) => {
               const aDate = moment(a.createdAt);
@@ -919,7 +915,7 @@ export default {
           ? [
               {
                 name: "Hotkeys",
-                description: "Nur Hotkeys anzeigen",
+                description: "Show hotkeys only",
                 filter(list, myThis) {
                   return list.filter(item => {
                     return myThis.listeningSoundIds.includes(item.id);
@@ -929,8 +925,8 @@ export default {
             ]
           : []),
         {
-          name: "Favoriten",
-          description: "Nur Favoriten anzeigen",
+          name: "Favorites",
+          description: "Show only favorites",
           filter(list, myThis) {
             return list.filter(item => {
               return myThis.isSoundFavourite(item);
@@ -939,7 +935,7 @@ export default {
         },
         {
           name: "Join-Sound",
-          description: "Nur den Join-Sound anzeigen",
+          description: "Show only the join sound",
           filter(list, myThis) {
             return list.filter(item => {
               return item.id === myThis.activeGuild.joinSound;
@@ -947,8 +943,8 @@ export default {
           }
         },
         {
-          name: "Eigene",
-          description: "Nur selbst erstellte anzeigen",
+          name: "Own",
+          description: "Show only commands that you have created yourself",
           filter(list) {
             return list.filter(item => item.creator);
           }
@@ -957,20 +953,19 @@ export default {
 
       validationRules: {
         command: [
-          v => !!v || "Befehl wird benötigt",
-          v => (v && v.length <= 15) || "Darf nicht länger als 15 Zeichen sein",
-          v => (v && v.length >= 3) || "Darf nicht kürzer als 3 Zeichen sein",
+          v => !!v || "Command required",
+          v => (v && v.length <= 15) || "Can not be longer than 15 characters",
+          v => (v && v.length >= 3) || "Can not be shorter than 3 characters",
           v =>
-            !this.activeGuildCommands.includes(v) ||
-            "Dieser Befehl existiert bereits",
+            !this.activeGuildCommands.includes(v) || "Command already exists",
           v =>
             /^[a-zA-Z0-9äÄöÖüÜß]*$/.test(v) ||
-            "Der Befehl enthält ungültige Zeichen"
+            "The command contains invalid characters"
         ],
         description: [
-          v => !!v || "Beschreibung wird benötigt",
-          v => (v && v.length <= 60) || "Darf nicht länger als 60 Zeichen sein",
-          v => (v && v.length >= 3) || "Darf nicht kürzer als 3 Zeichen sein"
+          v => !!v || "Description required",
+          v => (v && v.length <= 60) || "Can not be longer than 60 characters",
+          v => (v && v.length >= 3) || "Can not be shorter than 3 characters"
         ]
       }
     };

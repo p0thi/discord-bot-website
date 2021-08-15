@@ -16,7 +16,7 @@
               </v-icon>
             </v-btn>
           </template>
-          <span>{{ isFavourite ? "Favorit entfernen" : "Favorisieren" }}</span>
+          <span>{{ isFavourite ? "Remove favorite" : "Favor" }}</span>
         </v-tooltip>
 
         <v-menu v-model="playerMenu" top :close-on-content-click="false">
@@ -31,7 +31,7 @@
                   >
                 </v-btn>
               </template>
-              <span>Sound anhören</span>
+              <span>Listen to sound</span>
             </v-tooltip>
           </template>
 
@@ -63,7 +63,7 @@
             </v-btn>
           </template>
           <span>
-            {{ isJoinSound ? "Join-Sound entfernen" : "Join-Sound festlegen" }}
+            {{ isJoinSound ? "Remove join sound" : "Set join sound" }}
           </span>
         </v-tooltip>
       </div>
@@ -234,12 +234,12 @@ export default {
     },
     toggleJoinSound() {
       this.$confirm(
-        `Willst du diesen Sound wirklich als Join-Sound ${
-          this.isJoinSound ? "DEAKTIVIEREN" : "AKTIVIEREN"
-        }?`,
+        `Do you really want to  ${
+          this.isJoinSound ? "DEACTIVATE" : "ACTIVATE"
+        } the join sound?`,
         {
-          buttonTrueText: "Ja",
-          buttonFalseText: "Nein"
+          buttonTrueText: "Yes",
+          buttonFalseText: "No"
         }
       ).then(res => {
         if (res) {
@@ -280,7 +280,7 @@ export default {
             switch (e.response.status) {
               case 409:
                 this.$toast.error(
-                  "Du befindest dich in keinem Channel auf diesem Server, den der Bot erreichen kann.",
+                  "You are not in any channel on this server that the bot can reach.",
                   {
                     dismissable: true,
                     queueable: true
@@ -295,9 +295,9 @@ export default {
         });
     },
     deleteSound() {
-      this.$confirm("Wirklich diesen Sound ENDGÜLTIG löschen?", {
-        buttonTrueText: "Ja",
-        buttonFalseText: "Nein"
+      this.$confirm("Really delete this sound FINALLY?", {
+        buttonTrueText: "Yes",
+        buttonFalseText: "No"
       }).then(res => {
         if (res) {
           axios({
@@ -308,14 +308,14 @@ export default {
             }
           })
             .then(() => {
-              this.$toast.success(`Befehl erfolgreich gelöscht`, {
+              this.$toast.success(`Command deleted successfully`, {
                 dismissable: true,
                 queueable: true
               });
               this.$emit("deleted");
             })
             .catch(() => {
-              this.$toast.error(`Der Befehl konnte nicht gelöscht werden.`, {
+              this.$toast.error(`The command could not be deleted.`, {
                 dismissable: true,
                 queueable: true
               });

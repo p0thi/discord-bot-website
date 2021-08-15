@@ -171,15 +171,13 @@ ipcMain.on("store-hotkey", (event, data) => {
   }
   if (modifiers.size < 1) {
     console.log("modifier error");
-    data.error =
-      "Du brauchst mindestens einen modifier (Strg/Cmd, Alt, Shift...)";
+    data.error = "At least one modifyer required (Strg/Cmd, Alt, Shift...)";
     event.sender.send("store-hotkey-response-" + data.id, data);
     return;
   }
   if (keyCodes.size < 1) {
     console.log("key error");
-    data.error =
-      "Du brauchst mindestens einen weitern Schlüssel (Buchstaben, Zahlen...).";
+    data.error = "At least one further key required (Character, Number...).";
     event.sender.send("store-hotkey-response-" + data.id, data);
     return;
   }
@@ -187,7 +185,7 @@ ipcMain.on("store-hotkey", (event, data) => {
   const shortcutString =
     Array.from(modifiers).join("+") + "+" + Array.from(keyCodes).join("+");
   if (globalShortcut.isRegistered(shortcutString)) {
-    data.error = "Dieses Tastenkürzel wird bereits verwendet";
+    data.error = "This hotkey is already in use";
     event.sender.send("store-hotkey-response-" + data.id, data);
     return;
   }
@@ -208,7 +206,7 @@ ipcMain.on("store-hotkey", (event, data) => {
       if (counter >= hotkey.keys.length || counter >= data.keys.length) {
         console.log("intersection error");
         data.error =
-          "Dieses Tastenkürzel überschneidet sich (Teilweise) mit einem anderen.";
+          "This keyboard shortcut (partially) overlaps with another.";
         event.sender.send("store-hotkey-response-" + data.id, data);
         return;
       }
@@ -346,7 +344,7 @@ function createWindow() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "Anzeigen",
+      label: "Show",
       click: function() {
         // console.log('showing window')
         console.log("is visible before", win.isVisible());
@@ -357,7 +355,7 @@ function createWindow() {
       }
     },
     {
-      label: "Schließen",
+      label: "Close",
       click: function() {
         app.isQuiting = true;
         app.quit();
