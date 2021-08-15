@@ -13,7 +13,7 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       builderOptions: {
-        appId: "de.glowtrap.bot",
+        appId: "eu.pothi.sounds",
         productName: "Pothi-Bot Manager",
         nsis: {
           oneClick: false,
