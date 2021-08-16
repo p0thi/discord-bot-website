@@ -5,14 +5,14 @@ import store from "../store";
 
 export default function setup(vue) {
   axios.interceptors.response.use(
-    response => response,
-    function(err) {
+    (response) => response,
+    function (err) {
       switch (err.response.status) {
         case 401:
           store.dispatch("logout");
           vue.$toast.error("You are not logged in", {
             dismissable: true,
-            queueable: true
+            queueable: true,
           });
           break;
         case 429: {
@@ -21,7 +21,7 @@ export default function setup(vue) {
             `<b>SPAMSCHUTZ:</b><br>You'll have to wait before you can send any more commands<br>${hint}`,
             {
               dismissable: true,
-              queueable: false
+              queueable: false,
             }
           );
           const errorSound = new Audio(require("../assets/error.mp3"));

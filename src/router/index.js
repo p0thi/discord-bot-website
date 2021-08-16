@@ -11,7 +11,7 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home
+    component: Home,
   },
   {
     path: "/guilds",
@@ -21,18 +21,18 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/Guilds.vue"),
-    beforeEnter: requireAuth
+    beforeEnter: requireAuth,
   },
   {
     path: "/login",
     name: "Login",
     component: () =>
-      import(/* webpackChunkName: "login" */ "../views/Login.vue")
-  }
+      import(/* webpackChunkName: "login" */ "../views/Login.vue"),
+  },
 ];
 
 const router = new VueRouter({
-  routes
+  routes,
 });
 
 function requireAuth(to, from, next) {

@@ -17,9 +17,9 @@ const vuexLocal = new VuexPersistence({
       sortMethod: state.sortMethod,
       favouriteSoundsFirst: state.favouriteSoundsFirst,
       route: state.route,
-      filterMethods: state.filterMethods
+      filterMethods: state.filterMethods,
     };
-  }
+  },
 });
 
 const store = new Vuex.Store({
@@ -34,20 +34,20 @@ const store = new Vuex.Store({
     filterMethods: [],
     user: {},
     guilds: [],
-    sounds: {}
+    sounds: {},
   },
   getters: {
-    isLoggedIn: state => !!state.token,
-    authStatus: state => state.loginStatus,
-    token: state => state.token,
-    user: state => state.user,
-    guilds: state => state.guilds,
-    sounds: state => state.sounds,
-    getSortDirection: state => state.sortDirection,
-    getSortMethod: state => state.sortMethod,
-    getFavouriteSoundsFirst: state => state.favouriteSoundsFirst,
-    getRoute: state => state.route,
-    getFilterMethods: state => state.filterMethods
+    isLoggedIn: (state) => !!state.token,
+    authStatus: (state) => state.loginStatus,
+    token: (state) => state.token,
+    user: (state) => state.user,
+    guilds: (state) => state.guilds,
+    sounds: (state) => state.sounds,
+    getSortDirection: (state) => state.sortDirection,
+    getSortMethod: (state) => state.sortMethod,
+    getFavouriteSoundsFirst: (state) => state.favouriteSoundsFirst,
+    getRoute: (state) => state.route,
+    getFilterMethods: (state) => state.filterMethods,
   },
   mutations: {
     auth_request(state) {
@@ -92,7 +92,7 @@ const store = new Vuex.Store({
     },
     setFilterMethods(state, payload) {
       state.filterMethods = payload;
-    }
+    },
   },
   actions: {
     login({ commit, dispatch }) {
@@ -101,11 +101,11 @@ const store = new Vuex.Store({
         let authHandler = new AuthHandler();
         authHandler
           .auth()
-          .then(code => {
+          .then((code) => {
             commit("login_request");
             authHandler
               .login(code)
-              .then(loginResp => {
+              .then((loginResp) => {
                 let token = loginResp.data.token;
                 // localStorage.setItem("token", token);
                 axios.defaults.headers.common["Authorization"] = token;
@@ -118,13 +118,13 @@ const store = new Vuex.Store({
                 dispatch("fetchUser");
                 resolve(loginResp);
               })
-              .catch(err => {
+              .catch((err) => {
                 commit("auth_error");
                 // localStorage.removeItem("token");
                 reject(err);
               });
           })
-          .catch(err => {
+          .catch((err) => {
             commit("auth_error");
             // localStorage.removeItem("token");
             reject(err);
@@ -154,11 +154,11 @@ const store = new Vuex.Store({
           .get(
             `${process.env.VUE_APP_API_BASE_URL}/api/sounds/guildsounds/${guildId}`
           )
-          .then(response => {
+          .then((response) => {
             commit("setGuildSounds", { guildId, sounds: response.data });
             resolve(response.data);
           })
-          .catch(err => {
+          .catch((err) => {
             reject(err);
           });
       });
@@ -170,12 +170,12 @@ const store = new Vuex.Store({
         }
         axios
           .get(`${process.env.VUE_APP_API_BASE_URL}/api/guilds/all`)
-          .then(resp => {
+          .then((resp) => {
             console.log(resp);
             commit("guilds", resp.data);
             resolve(resp.data);
           })
-          .catch(err => {
+          .catch((err) => {
             reject(err);
           });
       });
@@ -185,18 +185,18 @@ const store = new Vuex.Store({
         console.log();
         axios
           .get(`${process.env.VUE_APP_API_BASE_URL}/api/user/self`)
-          .then(resp => {
+          .then((resp) => {
             commit("setUser", resp.data);
             console.log("user fetched", resp.data);
             resolve();
           })
-          .catch(e => {
+          .catch((e) => {
             reject(e);
           });
       });
-    }
+    },
   },
-  modules: {}
+  modules: {},
 });
 
 if (store.getters.isLoggedIn) {

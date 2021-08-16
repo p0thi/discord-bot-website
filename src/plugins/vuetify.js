@@ -14,27 +14,21 @@ Vue.use(VuetifyConfirm, {
   icon: "mdi-alert",
   title: "Warnung",
   width: 350,
-  property: "$confirm"
+  property: "$confirm",
 });
 
 Vue.use(Vuetify, {
   components: {
     VSnackbar,
     VBtn,
-    VIcon
-  }
+    VIcon,
+  },
 });
 
-Vue.use(VuetifyToast, {
-  classes: ["snackbar"],
-  timeout: 5000,
-  vertical: true
-});
-
-export default new Vuetify({
+const vueObj = new Vuetify({
   lang: {
     locales: { de },
-    current: "en"
+    current: "en",
   },
   theme: {
     themes: {
@@ -42,8 +36,17 @@ export default new Vuetify({
         primary: "#f09400",
         secondary: "#00d142",
         accent: "#000000",
-        error: "#de0000"
-      }
-    }
-  }
+        error: "#de0000",
+      },
+    },
+  },
+});
+
+export default vueObj;
+
+Vue.use(VuetifyToast, {
+  $vuetify: vueObj.framework,
+  classes: ["snackbar"],
+  timeout: 5000,
+  vertical: true,
 });

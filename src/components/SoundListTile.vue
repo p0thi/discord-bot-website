@@ -87,7 +87,7 @@
       <v-spacer v-if="!isWebsite"></v-spacer>
       <span v-if="!isWebsite" class="font-weight-bold">{{ hotkey }}</span>
       <v-btn
-        v-if="!hotkeyText && !isWebsite"
+        v-if="!hotkeys && !isWebsite"
         @click="recordHotkey"
         :color="recording ? 'red' : 'grey'"
         text
@@ -103,12 +103,17 @@
         ></v-progress-circular>
       </v-btn>
       <v-btn
+        class="hotkey-button"
         @click="deleteHotkey"
-        v-if="!!hotkeyText && !isWebsite"
+        v-if="!!hotkeys && !isWebsite"
         :color="recording ? 'red' : 'black'"
         text
       >
-        <span>{{ hotkeyText }}</span>
+        <span>
+          {{
+            hotkeys.map((k) => (k.length > 1 ? k : k.toUpperCase())).join(" + ")
+          }}
+        </span>
         <v-icon class="ml-2">mdi-close</v-icon>
       </v-btn>
     </v-card-actions>
@@ -132,7 +137,7 @@ if (process.env.VUE_APP_ELECTRON_ENV) {
 export default {
   //   name: "sound-list-tile",
   components: {
-    AudioPlayer: () => import("./AudioPlayer")
+    AudioPlayer: () => import("./AudioPlayer"),
   },
   ...(process.env.VUE_APP_ELECTRON_ENV && {
     created() {
@@ -142,7 +147,7 @@ export default {
           return;
         }
         if (data.hotkeys) {
-          this.hotkeyText = data.hotkeys.join("+");
+          this.hotkeys = data.hotkeys;
         }
       });
       ipcRenderer.send("get-hotkeys", this.sound);
@@ -157,34 +162,33 @@ export default {
         `hotkey-updated-${this.sound.id}`,
         this.handleHotkeyUpdate
       );
-    }
+    },
   }),
   methods: {
     ...mapActions(["fetchUser"]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       handleHotkeyUpdate(event, data) {
         if (data) {
-          this.hotkeyText = data.join("+");
+          this.hotkeys = data;
         } else {
-          this.hotkeyText = undefined;
+          this.hotkeys = undefined;
         }
       },
       recordHotkey() {
         this.recording = true;
-        const recorder = new HotkeyRecorder();
-        recorder.record(
+        const recorder = new HotkeyRecorder(
           () => {
             // console.log(recorder.isRecording());
             // console.log(recorder.getNamesFromKeys("de").join("+"));
-            this.hotkeyText = recorder.getNamesFromKeys("de").join("+");
+            this.hotkeys = recorder.getLocaleNames();
           },
-          keys => {
+          (keys) => {
             this.recording = false;
             // console.log(recorder.isRecording());
             // console.log("finish", keys);
             new Promise((resolve, reject) => {
               import("electron")
-                .then(electron => {
+                .then((electron) => {
                   const ipcRenderer = electron.ipcRenderer;
                   ipcRenderer.once(
                     `store-hotkey-response-${this.sound.id}`,
@@ -201,33 +205,41 @@ export default {
                     id: this.sound.id,
                     guild: this.guildId,
                     keys: keys.sort(),
-                    names: recorder.getNamesFromKeys("electron_us"),
-                    localeNames: recorder.getNamesFromKeys("de")
+                    names: recorder.getElectronNames(keys),
+                    localeNames: recorder.getLocaleNames(),
                   };
                   console.log("'BAUM", register);
 
                   console.log("register:", register);
                   ipcRenderer.send("store-hotkey", register);
                 })
-                .catch(e => {
+                .catch((e) => {
                   console.log(e);
                   reject("error importing electron");
                 });
-            }).catch(e => {
+            }).catch((e) => {
               this.hotkeyText = undefined;
               this.$toast.error(e, {
                 dismissable: true,
-                queueable: true
+                queueable: true,
               });
               console.log(e);
             });
+          },
+          () => {
+            this.$toast.error("Error recording the hotkey...", {
+              dismissable: true,
+              queueable: true,
+            });
           }
         );
+
+        recorder.record();
       },
       deleteHotkey() {
         // console.log("deleting hotkey for", this.sound.command);
         ipcRenderer.send("delete-hotkey", this.sound);
-      }
+      },
     }),
     setListening(val) {
       this.listening = val;
@@ -239,9 +251,9 @@ export default {
         } the join sound?`,
         {
           buttonTrueText: "Yes",
-          buttonFalseText: "No"
+          buttonFalseText: "No",
         }
-      ).then(res => {
+      ).then((res) => {
         if (res) {
           this.changingJoinSound = true;
           axios
@@ -249,12 +261,12 @@ export default {
               `${process.env.VUE_APP_API_BASE_URL}/api/sounds/joinsound`,
               {
                 ...(!this.isJoinSound && { sound: this.sound.id }),
-                ...(this.isJoinSound && { guild: this.guildId })
+                ...(this.isJoinSound && { guild: this.guildId }),
               },
               {
                 headers: {
-                  "Content-Type": "Application/json"
-                }
+                  "Content-Type": "Application/json",
+                },
               }
             )
             .then(() => {
@@ -271,11 +283,11 @@ export default {
       axios
         .get(`${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`, {
           params: {
-            id: this.sound.id
+            id: this.sound.id,
           },
-          timeout: 40000
+          timeout: 40000,
         })
-        .catch(e => {
+        .catch((e) => {
           if (e.response) {
             switch (e.response.status) {
               case 409:
@@ -283,7 +295,7 @@ export default {
                   "You are not in any channel on this server that the bot can reach.",
                   {
                     dismissable: true,
-                    queueable: true
+                    queueable: true,
                   }
                 );
                 break;
@@ -297,27 +309,27 @@ export default {
     deleteSound() {
       this.$confirm("Really delete this sound FINALLY?", {
         buttonTrueText: "Yes",
-        buttonFalseText: "No"
-      }).then(res => {
+        buttonFalseText: "No",
+      }).then((res) => {
         if (res) {
           axios({
             url: `${process.env.VUE_APP_API_BASE_URL}/api/sounds/delete`,
             method: "DELETE",
             data: {
-              sound: this.sound.id
-            }
+              sound: this.sound.id,
+            },
           })
             .then(() => {
               this.$toast.success(`Command deleted successfully`, {
                 dismissable: true,
-                queueable: true
+                queueable: true,
               });
               this.$emit("deleted");
             })
             .catch(() => {
               this.$toast.error(`The command could not be deleted.`, {
                 dismissable: true,
-                queueable: true
+                queueable: true,
               });
             });
         }
@@ -349,11 +361,11 @@ export default {
           }
           this.fetchUser();
         })
-        .catch(err => console.log(err))
+        .catch((err) => console.log(err))
         .finally(() => {
           this.favouriteLoading = false;
         });
-    }
+    },
   },
   computed: {
     ...mapGetters(["token", "user"]),
@@ -364,7 +376,7 @@ export default {
       set(value) {
         this.$emit("recordingState", value);
         this.recordingState = value;
-      }
+      },
     },
     audioFile() {
       return `${process.env.VUE_APP_API_BASE_URL}/api/sounds/listen/${this.sound.id}?token=${this.token}`;
@@ -374,7 +386,7 @@ export default {
         return false;
       }
       return this.user.favouriteSounds.includes(this.sound.id);
-    }
+    },
   },
   props: {
     commandPrefix: { type: String, required: true },
@@ -383,7 +395,7 @@ export default {
     editable: { type: Boolean, default: false },
     showCreationDate: { type: Boolean, default: false },
     isJoinSound: { typpe: Boolean, default: false },
-    hotkey: { type: String, required: false }
+    hotkey: { type: String, required: false },
   },
   data() {
     return {
@@ -391,16 +403,19 @@ export default {
       soundPlaying: false,
       listening: false,
       changingJoinSound: false,
-      hotkeyText: undefined,
+      hotkeys: undefined,
       recordingState: false,
       favouriteLoading: false,
-      playerMenu: false
+      playerMenu: false,
       // recorder: undefined,
     };
-  }
+  },
 };
 </script>
 <style lang="scss">
+.hotkey-button {
+  text-transform: none;
+}
 .shake {
   animation: shake-animation 1s ease infinite;
 }

@@ -8,13 +8,11 @@ import {
   ipcMain,
   globalShortcut,
   Menu,
-  Tray
+  Tray,
 } from "electron";
-import {
-  createProtocol,
-  installVueDevtools
-} from "vue-cli-plugin-electron-builder/lib";
+import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import { autoUpdater } from "electron-updater";
+import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const nodeUrl = require("url");
 const Store = require("electron-store");
 const path = require("path");
@@ -23,10 +21,10 @@ const gotTheLock = app.requestSingleInstanceLock();
 
 const store = new Store({
   migrations: {
-    "0.1.5": store => {
+    "0.1.5": (store) => {
       store.delete("hotkeys");
-    }
-  }
+    },
+  },
 });
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -80,7 +78,7 @@ ipcMain.on("last-selected-guild", (event, data) => {
   store.set("lastGuild", data);
 });
 
-ipcMain.on("get-last-selected-guild", event => {
+ipcMain.on("get-last-selected-guild", (event) => {
   event.returnValue = store.get("lastGuild");
 });
 
@@ -147,7 +145,7 @@ ipcMain.on("store-hotkey", (event, data) => {
     "Option",
     "AltGr",
     "Shift",
-    "Super"
+    "Super",
   ]);
   const modifiers = new Set();
   const keyCodes = new Set();
@@ -219,7 +217,7 @@ ipcMain.on("store-hotkey", (event, data) => {
     accelerator: shortcutString,
     keys: data.keys,
     names: data.names,
-    localeNames: data.localeNames
+    localeNames: data.localeNames,
   });
   listen(event, data);
   event.sender.send("store-hotkey-response-" + data.id, data);
@@ -262,8 +260,8 @@ function auth(event, uri) {
       fullscreenable: false,
       webPreferences: {
         nodeIntegration: false,
-        webSecurity: false
-      }
+        webSecurity: false,
+      },
     });
 
     authWindow.once("closed", () => {
@@ -308,7 +306,7 @@ function auth(event, uri) {
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-  { scheme: "app", privileges: { secure: true, standard: true } }
+  { scheme: "app", privileges: { secure: true, standard: true } },
 ]);
 
 function createWindow() {
@@ -320,11 +318,11 @@ function createWindow() {
     height: 800,
     center: true,
     webPreferences: {
-      nodeIntegration: true
-    }
+      nodeIntegration: true,
+    },
   });
 
-  win.on("page-title-updated", e => {
+  win.on("page-title-updated", (e) => {
     e.preventDefault();
   });
 
@@ -345,22 +343,22 @@ function createWindow() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Show",
-      click: function() {
+      click: function () {
         // console.log('showing window')
         console.log("is visible before", win.isVisible());
         win.show();
         win.restore();
         win.focus();
         console.log("is visible after", win.isVisible());
-      }
+      },
     },
     {
       label: "Close",
-      click: function() {
+      click: function () {
         app.isQuiting = true;
         app.quit();
-      }
-    }
+      },
+    },
   ]);
 
   appTray.setContextMenu(contextMenu);
@@ -373,7 +371,7 @@ function createWindow() {
     console.log("show event triggered");
   });
 
-  win.on("minimize", event => {
+  win.on("minimize", (event) => {
     event.preventDefault();
     win.hide();
   });
@@ -416,7 +414,8 @@ app.on("ready", async () => {
     // If you are not using Windows 10 dark mode, you may uncomment these lines
     // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
     try {
-      await installVueDevtools();
+      // await installVueDevtools();
+      installExtension(VUEJS_DEVTOOLS);
     } catch (e) {
       console.error("Vue Devtools failed to install:", e.toString());
     }
@@ -431,7 +430,7 @@ app.on("ready", async () => {
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === "win32") {
-    process.on("message", data => {
+    process.on("message", (data) => {
       if (data === "graceful-exit") {
         app.quit();
       }
@@ -463,12 +462,12 @@ try {
     //     bytesPerSecond: 2000000
     //   }});
   });
-  autoUpdater.on("error", err => {
+  autoUpdater.on("error", (err) => {
     console.log("update error");
     console.error(err);
     win.webContents.send("update-error");
   });
-  autoUpdater.on("download-progress", progressObj => {
+  autoUpdater.on("download-progress", (progressObj) => {
     console.log("update progress: " + progressObj.percent);
     win.webContents.send("update-download-progress", progressObj);
   });
@@ -479,7 +478,7 @@ try {
       // THIS IS PROBABLY SUPER BRITTLE AND MAKES ME WANT TO STOP USING APPIMAGE
       autoUpdater.logger.info("rewriting $APPIMAGE", {
         oldValue: process.env.APPIMAGE,
-        newValue: process.env.ARGV0
+        newValue: process.env.ARGV0,
       });
       process.env.APPIMAGE = process.env.ARGV0;
     } else {

@@ -23,10 +23,10 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   methods: {
-    ...mapActions(["login", "logout"])
+    ...mapActions(["login", "logout"]),
   },
   computed: {
-    ...mapGetters(["isLoggedIn", "authStatus"])
-  }
+    ...mapGetters(["isLoggedIn", "authStatus"]),
+  },
 };
 </script>

@@ -23,10 +23,7 @@
       <v-col v-if="isWebsite" md="6">
         <v-card>
           <v-card-title class="title">
-            <span
-              >Download desktop software with hotkey function now
-              <br />(Currently only german keyboard layout!)</span
-            >
+            <span>Download desktop software with hotkey function now</span>
             <v-btn
               href="https://github.com/p0thi/discord-bot-website/releases"
               target="_blank"
@@ -170,13 +167,13 @@ import { mapActions } from "vuex";
 
 export default {
   methods: {
-    ...mapActions(["fetchGuilds"])
+    ...mapActions(["fetchGuilds"]),
   },
   data() {
     return {
-      isWebsite: !process.env.VUE_APP_ELECTRON_ENV
+      isWebsite: !process.env.VUE_APP_ELECTRON_ENV,
     };
-  }
+  },
 };
 </script>
 <style lang="scss"></style>

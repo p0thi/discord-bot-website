@@ -180,14 +180,14 @@ export default {
       ipcRenderer.removeAllListeners("update-error");
       ipcRenderer.removeAllListeners("update-download-progress");
       ipcRenderer.removeAllListeners("update-downloaded");
-    }
+    },
   }),
   components: {},
   computed: {
     ...mapGetters(["isLoggedIn", "authStatus", "user"]),
     size() {
       return this.$vuetify.breakpoint.name;
-    }
+    },
   },
   methods: {
     ...mapActions(["login", "logout", "fetchUser"]),
@@ -202,18 +202,18 @@ export default {
       },
       install() {
         ipcRenderer.send("download-update");
-      }
-    })
+      },
+    }),
   },
   data: () => ({
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       updateAvailable: false,
       updating: false,
       updateProgress: undefined,
-      updateFinished: false
+      updateFinished: false,
     }),
-    isWebsite: !process.env.VUE_APP_ELECTRON_ENV
-  })
+    isWebsite: !process.env.VUE_APP_ELECTRON_ENV,
+  }),
 };
 </script>
 <style lang="scss">
@@ -241,6 +241,7 @@ export default {
     .v-snack__content {
       .vts__message {
         font-size: 1.25rem;
+        color: white;
       }
     }
   }

@@ -90,18 +90,18 @@ export default {
         .post(
           `${process.env.VUE_APP_API_BASE_URL}/api/guilds/settings/${this.guild.id}`,
           {
-            commandPrefix: this.commandPrefix
+            commandPrefix: this.commandPrefix,
           }
         )
-        .then(resp => {
-          this.guild.commandPrefix = resp.data.data.commandPrefix;
+        .then((resp) => {
+          this.commandPrefix = resp.data.data.commandPrefix;
           this.fetchGuilds();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$toast.error(
             `Settings could not be saved: ${err.response.data.message}`,
             {
-              dismissable: true
+              dismissable: true,
             }
           );
         })
@@ -135,11 +135,11 @@ export default {
           }
           this.fetchUser();
         })
-        .catch(err => console.log(err))
+        .catch((err) => console.log(err))
         .finally(() => {
           this.favouriteLoading = false;
         });
-    }
+    },
   },
   computed: {
     ...mapGetters(["user"]),
@@ -155,8 +155,8 @@ export default {
       },
       set(value) {
         this.prefix = value;
-      }
-    }
+      },
+    },
   },
   data() {
     return {
@@ -185,15 +185,15 @@ export default {
         "[",
         "]",
         "^",
-        "€"
-      ]
+        "€",
+      ],
     };
   },
   props: {
     guild: { type: Object, required: true },
     palette: { type: Object, required: true },
     active: { type: Boolean, default: false },
-    toggle: { type: Function, required: true }
-  }
+    toggle: { type: Function, required: true },
+  },
 };
 </script>

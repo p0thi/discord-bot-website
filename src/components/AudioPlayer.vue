@@ -57,7 +57,7 @@
       <v-progress-linear
         v-model="percentage"
         height="5"
-        style="margin-top: 15px; margin-bottom: 15px;"
+        style="margin-top: 15px; margin-bottom: 15px"
         :disabled="!loaded"
       ></v-progress-linear>
       <p>{{ currentTime }} / {{ duration }}</p>
@@ -74,7 +74,7 @@
 <script>
 import axios from "axios";
 import fileDownload from "js-file-download";
-const formatTime = second =>
+const formatTime = (second) =>
   second > 0 ? new Date(second * 1000).toISOString().substr(11, 8) : "00:00:00";
 
 export default {
@@ -82,37 +82,37 @@ export default {
   props: {
     file: {
       type: String,
-      default: null
+      default: null,
     },
     sound: {
       type: Object,
-      default: null
+      default: null,
     },
     autoPlay: {
       type: Boolean,
-      default: false
+      default: false,
     },
     ended: {
       type: Function,
-      default: () => {}
+      default: () => {},
     },
     canPlay: {
       type: Function,
-      default: () => {}
+      default: () => {},
     },
     color: {
       type: String,
-      default: null
+      default: null,
     },
     downloadable: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
-    duration: function() {
+    duration: function () {
       return this.audio ? formatTime(this.totalDuration) : "";
-    }
+    },
   },
   data() {
     return {
@@ -124,7 +124,7 @@ export default {
       percentage: 0,
       currentTime: "00:00:00",
       audio: undefined,
-      totalDuration: 0
+      totalDuration: 0,
     };
   },
   watch: {
@@ -172,8 +172,8 @@ export default {
       axios({
         method: "get",
         url: this.file,
-        responseType: "arraybuffer"
-      }).then(response => {
+        responseType: "arraybuffer",
+      }).then((response) => {
         const ext = response.headers["content-type"].split("/").pop();
         fileDownload(response.data, `${this.sound.command}.${ext}`);
       });
@@ -186,7 +186,7 @@ export default {
     reload() {
       this.audio.load();
     },
-    _handleLoaded: function() {
+    _handleLoaded: function () {
       if (this.audio.readyState >= 2) {
         if (this.audio.duration === Infinity) {
           //   Fix duration for streamed audio source or blob based
@@ -210,7 +210,7 @@ export default {
         throw new Error("Failed to load sound file");
       }
     },
-    _handlePlayingUI: function() {
+    _handlePlayingUI: function () {
       if (this.firstPlay) {
         this.percentage = 0;
         this.currentTime = "00:00:00";
@@ -220,7 +220,7 @@ export default {
       this.currentTime = formatTime(this.audio.currentTime);
       this.playing = true;
     },
-    _handlePlayPause: function(e) {
+    _handlePlayPause: function (e) {
       if (e.type === "play" && this.firstPlay) {
         // in some situations, audio.currentTime is the end one on chrome
         this.audio.currentTime = 0;
@@ -240,13 +240,13 @@ export default {
       this.paused = this.playing = false;
       this.$emit("playing", false);
     },
-    init: function() {
+    init: function () {
       this.audio.addEventListener("timeupdate", this._handlePlayingUI);
       this.audio.addEventListener("loadeddata", this._handleLoaded);
       this.audio.addEventListener("pause", this._handlePlayPause);
       this.audio.addEventListener("play", this._handlePlayPause);
       this.audio.addEventListener("ended", this._handleEnded);
-    }
+    },
   },
   mounted() {
     this.audio = this.$refs.player;
@@ -258,6 +258,6 @@ export default {
     this.audio.removeEventListener("pause", this._handlePlayPause);
     this.audio.removeEventListener("play", this._handlePlayPause);
     this.audio.removeEventListener("ended", this._handleEnded);
-  }
+  },
 };
 </script>

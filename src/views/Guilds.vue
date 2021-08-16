@@ -19,8 +19,8 @@
           <v-col
             v-if="
               !guilds ||
-                guilds.length === 0 ||
-                filteredSortedGuilds.length === 0
+              guilds.length === 0 ||
+              filteredSortedGuilds.length === 0
             "
           >
             <span v-if="fetchingGuilds">
@@ -96,9 +96,7 @@
                     :rules="validationRules.command"
                     placeholder="Command"
                     v-model="addSoundFormData.command"
-                    :hint="
-                      `Write command without ${activeGuild.commandPrefix} at the beginning`
-                    "
+                    :hint="`Write command without ${activeGuild.commandPrefix} at the beginning`"
                     required
                   >
                     <template v-slot:prepend>
@@ -364,7 +362,7 @@ if (process.env.VUE_APP_ELECTRON_ENV) {
 export default {
   components: {
     "sound-list-tile": SoundListTile,
-    "guild-list-tile": GuildListTile
+    "guild-list-tile": GuildListTile,
   },
   created() {
     if (!this.guilds || this.guilds.length === 0) {
@@ -382,7 +380,7 @@ export default {
   ...(process.env.VUE_APP_ELECTRON_ENV && {
     beforeDestroy() {
       // this.removeSoundHotkeys(this.activeGuildSounds)
-    }
+    },
   }),
   watch: {
     ...(process.env.VUE_APP_ELECTRON_ENV && {
@@ -393,13 +391,13 @@ export default {
           const toSounds = to || [];
           const fromSounds = from || [];
 
-          let remove = fromSounds.filter(x => !toSounds.includes(x));
-          let add = toSounds.filter(x => !fromSounds.includes(x));
+          let remove = fromSounds.filter((x) => !toSounds.includes(x));
+          let add = toSounds.filter((x) => !fromSounds.includes(x));
 
           this.removeSoundHotkeys(remove);
           this.addSoundHotkeys(add);
-        }
-      }
+        },
+      },
     }),
     activeGuild(to) {
       if (!this.sounds[to.id]) {
@@ -414,7 +412,7 @@ export default {
         if (process.env.VUE_APP_ELECTRON_ENV) {
           ipcRenderer.send("last-selected-guild", to.query.guild);
         }
-      }
+      },
     },
     paginationLength(to) {
       if (to < this.currentSoundPage) {
@@ -432,7 +430,7 @@ export default {
           if (!guild.icon) {
             continue;
           }
-          getColors(guild.icon).then(colors => {
+          getColors(guild.icon).then((colors) => {
             let first = chroma(
               colors[0]._rgb[0],
               colors[0]._rgb[1],
@@ -462,13 +460,13 @@ export default {
             this.$set(this.guildColors, guild.id, {
               first: first.hex(),
               second: second.hex(),
-              darkFirst: first.darken().hex()
+              darkFirst: first.darken().hex(),
             });
             // tmpColors[guild.id] = { first, second };
           });
         }
-      }
-    }
+      },
+    },
   },
   methods: {
     ...mapActions(["fetchGuilds", "fetchSounds", "fetchUser"]),
@@ -477,11 +475,11 @@ export default {
       "setFavouriteSoundsFirst",
       "setSortDirection",
       "setSortMethod",
-      "setFilterMethods"
+      "setFilterMethods",
     ]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       addSoundHotkeys(add) {
-        add.forEach(x => {
+        add.forEach((x) => {
           ipcRenderer.on(`shortcut-triggered-${x.id}`, async (event, sound) => {
             axios
               .all(
@@ -490,13 +488,13 @@ export default {
                   {
                     params: {
                       id: sound.id,
-                      block: false
+                      block: false,
                     },
-                    timeout: 40000
+                    timeout: 40000,
                   }
                 )
               )
-              .catch(e => {
+              .catch((e) => {
                 if (e.response) {
                   switch (e.response.status) {
                     case 409:
@@ -504,14 +502,14 @@ export default {
                         "You are not in any channel on this server that the bot can reach.",
                         {
                           dismissable: true,
-                          queueable: true
+                          queueable: true,
                         }
                       );
                       break;
                   }
                 }
               })
-              .then(e => {
+              .then((e) => {
                 console.log("sound played", e);
               });
           });
@@ -531,7 +529,7 @@ export default {
         });
       },
       removeSoundHotkeys(remove) {
-        remove.forEach(x => {
+        remove.forEach((x) => {
           ipcRenderer.removeAllListeners(`shortcut-triggered-${x.id}`);
           ipcRenderer.removeAllListeners(`listening-sound-${x.id}`);
           ipcRenderer.send("remove-sound-listener", x);
@@ -541,7 +539,7 @@ export default {
             this.listeningSoundIds.splice(index, 1);
           }
         });
-      }
+      },
     }),
     reload() {
       this.fetchingGuilds = true;
@@ -564,12 +562,12 @@ export default {
         .get(`${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`, {
           params: {
             id: "random",
-            guild: this.activeGuild.id
+            guild: this.activeGuild.id,
             // block: false
           },
-          timeout: 40000
+          timeout: 40000,
         })
-        .catch(e => {
+        .catch((e) => {
           if (e.response) {
             switch (e.response.status) {
               case 409:
@@ -577,7 +575,7 @@ export default {
                   "You are not in any channel on this server that the bot can reach.",
                   {
                     dismissable: true,
-                    queueable: true
+                    queueable: true,
                   }
                 );
                 break;
@@ -631,10 +629,10 @@ export default {
       axios
         .post(`${this.baseUrl}/api/sounds/upload`, formData, {
           headers: {
-            "Content-Type": "Application/json"
-          }
+            "Content-Type": "Application/json",
+          },
         })
-        .then(res => {
+        .then((res) => {
           console.log(res);
           this.addSoundDialog = false;
           this.$toast.success(
@@ -643,7 +641,7 @@ export default {
           this.reload();
           this.$refs.addSoundForm.reset();
         })
-        .catch(e => {
+        .catch((e) => {
           this.$toast.error(
             `Command could not be saved: <b>${e.response.data.message}</b>`
           );
@@ -675,7 +673,7 @@ export default {
         return false;
       }
       return this.user.favouriteSounds.includes(sound.id);
-    }
+    },
   },
   computed: {
     ...mapGetters([
@@ -685,7 +683,7 @@ export default {
       "getSortDirection",
       "getSortMethod",
       "getFavouriteSoundsFirst",
-      "getFilterMethods"
+      "getFilterMethods",
     ]),
     activeGuild: {
       get() {
@@ -702,7 +700,7 @@ export default {
           this.slide = value.id;
         }
         // this.activeGuildId = value ? value.id : undefined;
-      }
+      },
     },
     slide: {
       get() {
@@ -710,7 +708,7 @@ export default {
       },
       set(value) {
         this.$router.push({ query: { guild: value } }).catch(() => {});
-      }
+      },
     },
     activeGuildSounds() {
       if (!this.activeGuild) {
@@ -723,7 +721,7 @@ export default {
       if (!this.activeGuild) {
         return [];
       }
-      return this.activeGuildSounds.map(sound => sound.command);
+      return this.activeGuildSounds.map((sound) => sound.command);
     },
     filteredSortedActiveGuildSounds() {
       if (!this.activeGuild) {
@@ -742,7 +740,7 @@ export default {
         const searchString = this.soundSearchString.trim().toLowerCase();
         // console.log("filtering", searchString);
         // console.log("with type", searchString);
-        result = result.filter(sound => {
+        result = result.filter((sound) => {
           return (
             sound.command.toLowerCase().includes(searchString) ||
             sound.description.toLowerCase().includes(searchString)
@@ -752,9 +750,10 @@ export default {
         // console.log("after length", result.length);
       }
 
-      let currentSortMethod = this.soundSortings[
-        Math.min(this.sortMethod, this.soundSortings.length - 1)
-      ];
+      let currentSortMethod =
+        this.soundSortings[
+          Math.min(this.sortMethod, this.soundSortings.length - 1)
+        ];
       result = currentSortMethod.sort(result, this.sortDirection);
 
       for (const index of this.filterMethods) {
@@ -796,7 +795,7 @@ export default {
         this.guildSearchString.trim().length >= 2
       ) {
         const searchString = this.guildSearchString.trim().toLowerCase();
-        result = result.filter(guild => {
+        result = result.filter((guild) => {
           return (
             guild.name.toLowerCase().includes(searchString) ||
             guild.name.toLowerCase().includes(searchString)
@@ -825,7 +824,7 @@ export default {
       },
       set(value) {
         this.setFavouriteSoundsFirst(value);
-      }
+      },
     },
     sortDirection: {
       get() {
@@ -833,7 +832,7 @@ export default {
       },
       set(value) {
         this.setSortDirection(value);
-      }
+      },
     },
     sortMethod: {
       get() {
@@ -841,7 +840,7 @@ export default {
       },
       set(value) {
         this.setSortMethod(value);
-      }
+      },
     },
     filterMethods: {
       get() {
@@ -849,13 +848,13 @@ export default {
       },
       set(value) {
         this.setFilterMethods(value);
-      }
-    }
+      },
+    },
   },
   data() {
     return {
       ...(process.env.VUE_APP_ELECTRON_ENV && {
-        listeningSoundIds: []
+        listeningSoundIds: [],
       }),
       baseUrl: process.env.VUE_APP_API_BASE_URL,
 
@@ -879,7 +878,7 @@ export default {
       addSoundFormData: {
         command: "",
         description: "",
-        file: undefined
+        file: undefined,
       },
 
       // favouriteSoundsFirst: false,
@@ -893,7 +892,7 @@ export default {
             return list.sort(
               (a, b) => direction * a.command.localeCompare(b.command)
             );
-          }
+          },
         },
         {
           name: "Creation Date",
@@ -906,8 +905,8 @@ export default {
               const result = aDate > bDate ? 1 : bDate > aDate ? -1 : 0;
               return direction * result;
             });
-          }
-        }
+          },
+        },
       ],
 
       soundFilters: [
@@ -917,59 +916,61 @@ export default {
                 name: "Hotkeys",
                 description: "Show hotkeys only",
                 filter(list, myThis) {
-                  return list.filter(item => {
+                  return list.filter((item) => {
                     return myThis.listeningSoundIds.includes(item.id);
                   });
-                }
-              }
+                },
+              },
             ]
           : []),
         {
           name: "Favorites",
           description: "Show only favorites",
           filter(list, myThis) {
-            return list.filter(item => {
+            return list.filter((item) => {
               return myThis.isSoundFavourite(item);
             });
-          }
+          },
         },
         {
           name: "Join-Sound",
           description: "Show only the join sound",
           filter(list, myThis) {
-            return list.filter(item => {
+            return list.filter((item) => {
               return item.id === myThis.activeGuild.joinSound;
             });
-          }
+          },
         },
         {
           name: "Own",
           description: "Show only commands that you have created yourself",
           filter(list) {
-            return list.filter(item => item.creator);
-          }
-        }
+            return list.filter((item) => item.creator);
+          },
+        },
       ],
 
       validationRules: {
         command: [
-          v => !!v || "Command required",
-          v => (v && v.length <= 15) || "Can not be longer than 15 characters",
-          v => (v && v.length >= 3) || "Can not be shorter than 3 characters",
-          v =>
+          (v) => !!v || "Command required",
+          (v) =>
+            (v && v.length <= 15) || "Can not be longer than 15 characters",
+          (v) => (v && v.length >= 3) || "Can not be shorter than 3 characters",
+          (v) =>
             !this.activeGuildCommands.includes(v) || "Command already exists",
-          v =>
+          (v) =>
             /^[a-zA-Z0-9äÄöÖüÜß]*$/.test(v) ||
-            "The command contains invalid characters"
+            "The command contains invalid characters",
         ],
         description: [
-          v => !!v || "Description required",
-          v => (v && v.length <= 60) || "Can not be longer than 60 characters",
-          v => (v && v.length >= 3) || "Can not be shorter than 3 characters"
-        ]
-      }
+          (v) => !!v || "Description required",
+          (v) =>
+            (v && v.length <= 60) || "Can not be longer than 60 characters",
+          (v) => (v && v.length >= 3) || "Can not be shorter than 3 characters",
+        ],
+      },
     };
-  }
+  },
 };
 </script>
 <style lang="scss">

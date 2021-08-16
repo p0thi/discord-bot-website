@@ -27,14 +27,14 @@ export default class AuthHandler {
         });
       } else {
         // WEBSITE ENV
-        const _handleCode = event => {
+        const _handleCode = (event) => {
           if (event.type !== "message") {
             return;
           }
 
           if (event.origin !== EVENT_ORIGIN) {
-            reject("Wrong origin");
-            return;
+            // reject("Wrong origin");
+            // return;
           }
 
           const { data } = event;
@@ -96,9 +96,9 @@ export default class AuthHandler {
       axios
         .post(`${process.env.VUE_APP_API_BASE_URL}/api/auth/login`, {
           code,
-          redirect: REDIRECT_URL
+          redirect: REDIRECT_URL,
         })
-        .then(response => {
+        .then((response) => {
           console.log("response", response);
           resolve(response);
         })
