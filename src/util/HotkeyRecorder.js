@@ -18,13 +18,13 @@ export default class HotkeyRecorder {
       recorder.finish(recorder.pressedKeys);
     }
     recorder = this;
-    const keyboardMap = await navigator.keyboard?.getLayoutMap();
+    const keyboardMap = await navigator.keyboard.getLayoutMap();
 
     this.keydown = (event) => {
       event.preventDefault();
       const keyCode = event.which;
       const localizedKey =
-        keyboardMap.get(event.code) ?? this.getElectronNames([keyCode])[0];
+        keyboardMap.get(event.code) || this.getElectronNames([keyCode])[0];
 
       let alreadyPresent = false;
       for (let i = 0; i < this.pressedKeys.length; i++) {
@@ -95,7 +95,7 @@ export default class HotkeyRecorder {
       "", // [14]
       "", // [15]
       "Shift", // [16]
-      "CmdOrCtrl", // [17]
+      "Ctrl", // [17] CmdOrCtrl
       "Alt", // [18]
       "MediaPlayPause", // [19]
       "", // [20]
