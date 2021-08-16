@@ -25,7 +25,7 @@
           <v-card-title class="title">
             <span>Download desktop software with hotkey function now</span>
             <v-btn
-              href="https://github.com/p0thi/discord-bot-website/releases"
+              href="https://github.com/p0thi/discord-bot-website/releases/latest"
               target="_blank"
               large
               color="secondary"
