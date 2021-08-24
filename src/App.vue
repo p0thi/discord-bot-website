@@ -148,6 +148,7 @@ export default {
   name: "App",
   created() {
     this.fetchUser();
+    this.fetchPermissions();
     if (process.env.VUE_APP_ELECTRON_ENV) {
       ipcRenderer.on("checking-for-update", () => {});
       ipcRenderer.on("update-available", () => {
@@ -190,7 +191,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(["login", "logout", "fetchUser"]),
+    ...mapActions(["login", "logout", "fetchUser", "fetchPermissions"]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       restartApp() {
         ipcRenderer.send("restart-app");

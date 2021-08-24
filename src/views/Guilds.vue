@@ -291,8 +291,7 @@
                   @deleted="reload()"
                   :commandPrefix="activeGuild.commandPrefix"
                   :sound="sound"
-                  :guildId="activeGuild.id"
-                  :editable="sound.creator || activeGuild.owner"
+                  :guild="activeGuild"
                   :isJoinSound="activeGuild.joinSound === sound.id"
                 >
                   <template v-if="sortMethod === 1" v-slot:date>
@@ -484,7 +483,10 @@ export default {
             axios
               .all(
                 axios.get(
-                  `${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`,
+                  `${
+                    process.env.VUE_APP_API_BASE_URL ||
+                    `${window.location.protocol}//${window.location.host}`
+                  }/api/sounds/play`,
                   {
                     params: {
                       id: sound.id,
@@ -559,14 +561,20 @@ export default {
       }
       this.randomPlaying = true;
       axios
-        .get(`${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`, {
-          params: {
-            id: "random",
-            guild: this.activeGuild.id,
-            // block: false
-          },
-          timeout: 40000,
-        })
+        .get(
+          `${
+            process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`
+          }/api/sounds/play`,
+          {
+            params: {
+              id: "random",
+              guild: this.activeGuild.id,
+              // block: false
+            },
+            timeout: 40000,
+          }
+        )
         .catch((e) => {
           if (e.response) {
             switch (e.response.status) {
@@ -627,11 +635,18 @@ export default {
       //   }
 
       axios
-        .post(`${this.baseUrl}/api/sounds/upload`, formData, {
-          headers: {
-            "Content-Type": "Application/json",
-          },
-        })
+        .post(
+          `${
+            process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`
+          }/api/sounds/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "Application/json",
+            },
+          }
+        )
         .then((res) => {
           console.log(res);
           this.addSoundDialog = false;
@@ -856,8 +871,6 @@ export default {
       ...(process.env.VUE_APP_ELECTRON_ENV && {
         listeningSoundIds: [],
       }),
-      baseUrl: process.env.VUE_APP_API_BASE_URL,
-
       palettes: {},
 
       randomPlaying: false,

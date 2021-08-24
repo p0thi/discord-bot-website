@@ -50,7 +50,7 @@
           </audio>-->
         </v-menu>
 
-        <v-tooltip bottom>
+        <v-tooltip v-if="canUseJoinSound" bottom>
           <template v-slot:activator="{ on }">
             <v-btn
               v-on="on"
@@ -74,20 +74,30 @@
       <slot name="date"></slot>
     </v-card-subtitle>
     <v-card-actions>
-      <v-btn :loading="soundPlaying" @click="playSound" color="success" icon>
+      <v-btn
+        v-if="canPlaySounds"
+        :loading="soundPlaying"
+        @click="playSound"
+        color="success"
+        icon
+      >
         <v-icon large>mdi-play</v-icon>
       </v-btn>
 
       <v-spacer v-if="isWebsite"></v-spacer>
-      <div v-if="editable">
+      <div
+        v-if="
+          !guild.banned && (sound.creator || guild.owner || canDeleteAllSounds)
+        "
+      >
         <v-btn @click="deleteSound" color="red" icon>
           <v-icon>mdi-delete-forever</v-icon>
         </v-btn>
       </div>
-      <v-spacer v-if="!isWebsite"></v-spacer>
+      <v-spacer v-if="!isWebsite && canPlaySounds"></v-spacer>
       <span v-if="!isWebsite" class="font-weight-bold">{{ hotkey }}</span>
       <v-btn
-        v-if="!hotkeys && !isWebsite"
+        v-if="!hotkeys && !isWebsite && canPlaySounds"
         @click="recordHotkey"
         :color="recording ? 'red' : 'grey'"
         text
@@ -105,7 +115,7 @@
       <v-btn
         class="hotkey-button"
         @click="deleteHotkey"
-        v-if="!!hotkeys && !isWebsite"
+        v-if="!!hotkeys && !isWebsite && canPlaySounds"
         :color="recording ? 'red' : 'black'"
         text
       >
@@ -203,7 +213,7 @@ export default {
                   );
                   const register = {
                     id: this.sound.id,
-                    guild: this.guildId,
+                    guild: this.guild.id,
                     keys: keys.sort(),
                     names: recorder.getElectronNames(keys),
                     localeNames: recorder.getLocaleNames(),
@@ -258,10 +268,13 @@ export default {
           this.changingJoinSound = true;
           axios
             .post(
-              `${process.env.VUE_APP_API_BASE_URL}/api/sounds/joinsound`,
+              `${
+                process.env.VUE_APP_API_BASE_URL ||
+                `${window.location.protocol}//${window.location.host}`
+              }/api/sounds/joinsound`,
               {
                 ...(!this.isJoinSound && { sound: this.sound.id }),
-                ...(this.isJoinSound && { guild: this.guildId }),
+                ...(this.isJoinSound && { guild: this.guild.id }),
               },
               {
                 headers: {
@@ -281,12 +294,18 @@ export default {
     playSound() {
       this.soundPlaying = true;
       axios
-        .get(`${process.env.VUE_APP_API_BASE_URL}/api/sounds/play`, {
-          params: {
-            id: this.sound.id,
-          },
-          timeout: 40000,
-        })
+        .get(
+          `${
+            process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`
+          }/api/sounds/play`,
+          {
+            params: {
+              id: this.sound.id,
+            },
+            timeout: 40000,
+          }
+        )
         .catch((e) => {
           if (e.response) {
             switch (e.response.status) {
@@ -313,7 +332,10 @@ export default {
       }).then((res) => {
         if (res) {
           axios({
-            url: `${process.env.VUE_APP_API_BASE_URL}/api/sounds/delete`,
+            url: `${
+              process.env.VUE_APP_API_BASE_URL ||
+              `${window.location.protocol}//${window.location.host}`
+            }/api/sounds/delete`,
             method: "DELETE",
             data: {
               sound: this.sound.id,
@@ -342,7 +364,10 @@ export default {
       const method = this.isFavourite ? "remove" : "add";
       axios
         .post(
-          `${process.env.VUE_APP_API_BASE_URL}/api/sounds/favourite/${method}`,
+          `${
+            process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`
+          }/api/sounds/favourite/${method}`,
           { sound: this.sound.id }
         )
         .then(() => {
@@ -379,7 +404,10 @@ export default {
       },
     },
     audioFile() {
-      return `${process.env.VUE_APP_API_BASE_URL}/api/sounds/listen/${this.sound.id}?token=${this.token}`;
+      return `${
+        process.env.VUE_APP_API_BASE_URL ||
+        `${window.location.protocol}//${window.location.host}`
+      }/api/sounds/listen/${this.sound.id}?token=${this.token}`;
     },
     isFavourite() {
       if (!this.user || !this.user.favouriteSounds) {
@@ -387,12 +415,28 @@ export default {
       }
       return this.user.favouriteSounds.includes(this.sound.id);
     },
+    canDeleteAllSounds() {
+      return (
+        this.guild.userPermissions.includes("DELETE_ALL_SOUNDS") &&
+        !this.guild.banned
+      );
+    },
+    canUseJoinSound() {
+      return (
+        this.guild.userPermissions.includes("USE_JOIN_SOUND") &&
+        !this.guild.banned
+      );
+    },
+    canPlaySounds() {
+      return (
+        this.guild.userPermissions.includes("PLAY_SOUNDS") && !this.guild.banned
+      );
+    },
   },
   props: {
     commandPrefix: { type: String, required: true },
     sound: { type: Object, required: true },
-    guildId: { type: String, required: true },
-    editable: { type: Boolean, default: false },
+    guild: { type: Object, required: true },
     showCreationDate: { type: Boolean, default: false },
     isJoinSound: { typpe: Boolean, default: false },
     hotkey: { type: String, required: false },

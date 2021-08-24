@@ -17,7 +17,7 @@
       <div :style="{ color: palette.second }">
         <v-card-title class="headline">{{ guild.name }}</v-card-title>
         <v-card-subtitle :style="{ color: palette.second }">
-          <div>{{ guild.sounds }} sounds available</div>
+          <div>{{ guild.sounds }} sounds (max {{ guild.maxSounds }})</div>
           <div class="body-2 font-weight-thin">
             <span>Command prefix:</span>
             <span class="font-weight-bold ml-2">{{ guild.commandPrefix }}</span>
@@ -34,40 +34,34 @@
           <v-icon>{{ isFavourite ? "mdi-star" : "mdi-star-outline" }}</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-        <v-dialog v-if="guild.editable" v-model="settingsDialog" width="400px">
-          <template v-slot:activator="{ on }">
-            <v-btn
-              v-on="on"
-              :color="palette.second"
-              :loading="settingsLoading"
-              icon
-            >
-              <v-icon>mdi-cogs</v-icon>
-            </v-btn>
-          </template>
-
-          <v-card>
-            <v-card-title>Settings: {{ guild.name }}</v-card-title>
-            <v-form ref="settingsForm">
-              <v-card-text>
-                <v-select
-                  v-model="commandPrefix"
-                  label="Command prefix"
-                  persistent-hint
-                  hint="Character used to begin commands in discord chat"
-                  :items="validPrefixes"
-                  required
-                  dense
-                ></v-select>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn @click="abortSettings" color="red" text>Cancel</v-btn>
-                <v-btn @click="saveSettings" text>Save</v-btn>
-              </v-card-actions>
-            </v-form>
-          </v-card>
-        </v-dialog>
+        <v-btn
+          v-if="
+            !guild.banned &&
+            (canManageGroups || canManageGuildSettings || guild.owner)
+          "
+          @click="settingsDialog = !settingsDialog"
+          :color="palette.second"
+          :loading="settingsLoading"
+          icon
+        >
+          <v-icon>mdi-cogs</v-icon>
+        </v-btn>
+        <v-bottom-sheet
+          v-if="
+            !guild.banned &&
+            (canManageGroups || canManageGuildSettings || guild.owner)
+          "
+          v-model="settingsDialog"
+          inset
+          scrollable
+          persistent
+        >
+          <guild-editor
+            v-if="settingsDialog"
+            :guild="guild"
+            @close="settingsDialog = false"
+          ></guild-editor>
+        </v-bottom-sheet>
       </div>
     </div>
   </v-card>
@@ -75,48 +69,28 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
+import GuildEditor from "./GuildEditor";
 
 export default {
   name: "guild-list-tile",
+  components: {
+    "guild-editor": GuildEditor,
+  },
   methods: {
     ...mapActions(["fetchUser", "fetchGuilds"]),
     abortSettings() {
       // this.$refs.settingsForm.reset();
       this.settingsDialog = false;
     },
-    saveSettings() {
-      this.settingsLoading = true;
-      axios
-        .post(
-          `${process.env.VUE_APP_API_BASE_URL}/api/guilds/settings/${this.guild.id}`,
-          {
-            commandPrefix: this.commandPrefix,
-          }
-        )
-        .then((resp) => {
-          this.commandPrefix = resp.data.data.commandPrefix;
-          this.fetchGuilds();
-        })
-        .catch((err) => {
-          this.$toast.error(
-            `Settings could not be saved: ${err.response.data.message}`,
-            {
-              dismissable: true,
-            }
-          );
-        })
-        .finally(() => {
-          this.$refs.settingsForm.reset();
-          this.settingsLoading = false;
-          this.settingsDialog = false;
-        });
-    },
     toggleFavourite() {
       this.favouriteLoading = true;
       const method = this.isFavourite ? "remove" : "add";
       axios
         .post(
-          `${process.env.VUE_APP_API_BASE_URL}/api/guilds/favourite/${method}`,
+          `${
+            process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`
+          }/api/guilds/favourite/${method}`,
           { guild: this.guild.id }
         )
         .then(() => {
@@ -149,13 +123,17 @@ export default {
       }
       return this.user.favouriteGuilds.includes(this.guild.id);
     },
-    commandPrefix: {
-      get() {
-        return this.prefix || this.guild.commandPrefix;
-      },
-      set(value) {
-        this.prefix = value;
-      },
+    canManageGroups() {
+      return (
+        this.guild.userPermissions.includes("MANAGE_GROUPS") &&
+        !this.guild.banned
+      );
+    },
+    canManageGuildSettings() {
+      return (
+        this.guild.userPermissions.includes("MANAGE_GUILD_SETTINGS") &&
+        !this.guild.banned
+      );
     },
   },
   data() {
@@ -163,30 +141,7 @@ export default {
       favouriteLoading: false,
       settingsLoading: false,
       settingsDialog: false,
-      prefix: undefined,
       rules: {},
-      validPrefixes: [
-        "!",
-        "#",
-        "+",
-        "-",
-        "$",
-        "§",
-        "%",
-        "&",
-        "\\",
-        "(",
-        ")",
-        "=",
-        "?",
-        ".",
-        ",",
-        "|",
-        "[",
-        "]",
-        "^",
-        "€",
-      ],
     };
   },
   props: {

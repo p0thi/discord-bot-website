@@ -34,7 +34,9 @@ const store = new Vuex.Store({
     filterMethods: [],
     user: {},
     guilds: [],
+    permissions: {},
     sounds: {},
+    apiParameters: {},
   },
   getters: {
     isLoggedIn: (state) => !!state.token,
@@ -43,11 +45,13 @@ const store = new Vuex.Store({
     user: (state) => state.user,
     guilds: (state) => state.guilds,
     sounds: (state) => state.sounds,
+    permissions: (state) => state.permissions,
     getSortDirection: (state) => state.sortDirection,
     getSortMethod: (state) => state.sortMethod,
     getFavouriteSoundsFirst: (state) => state.favouriteSoundsFirst,
     getRoute: (state) => state.route,
     getFilterMethods: (state) => state.filterMethods,
+    getApiParameters: (state) => state.apiParameters,
   },
   mutations: {
     auth_request(state) {
@@ -72,6 +76,9 @@ const store = new Vuex.Store({
     guilds(state, guilds) {
       state.guilds = guilds;
     },
+    setPermissions(state, permissions) {
+      state.permissions = permissions;
+    },
     setUser(state, user) {
       state.user = user;
     },
@@ -93,41 +100,60 @@ const store = new Vuex.Store({
     setFilterMethods(state, payload) {
       state.filterMethods = payload;
     },
+    setApiParameters(state, payload) {
+      state.apiParameters = payload;
+    },
   },
   actions: {
     login({ commit, dispatch }) {
       return new Promise((resolve, reject) => {
         commit("auth_request");
-        let authHandler = new AuthHandler();
-        authHandler
-          .auth()
-          .then((code) => {
-            commit("login_request");
+        axios
+          .get(
+            (process.env.VUE_APP_API_BASE_URL ||
+              `${window.location.protocol}//${window.location.host}`) +
+              "/api/auth/client_id"
+          )
+          .then((response) => {
+            console.log(response);
+            commit("setApiParameters", response.data);
+            let authHandler = new AuthHandler(
+              response.data.client_id,
+              response.data.redirect_url
+            );
             authHandler
-              .login(code)
-              .then((loginResp) => {
-                let token = loginResp.data.token;
-                // localStorage.setItem("token", token);
-                axios.defaults.headers.common["Authorization"] = token;
-                commit("auth_success", token);
-                const redirect = router.history.current.query.redirect
-                  ? decodeURIComponent(router.history.current.query.redirect)
-                  : "/";
-                console.log("redirecting", redirect);
-                router.push(redirect);
-                dispatch("fetchUser");
-                resolve(loginResp);
+              .auth()
+              .then((code) => {
+                commit("login_request");
+                authHandler
+                  .login(code)
+                  .then((loginResp) => {
+                    let token = loginResp.data.token;
+                    // localStorage.setItem("token", token);
+                    axios.defaults.headers.common["Authorization"] = token;
+                    commit("auth_success", token);
+                    const redirect = router.history.current.query.redirect
+                      ? decodeURIComponent(
+                          router.history.current.query.redirect
+                        )
+                      : "/";
+                    console.log("redirecting", redirect);
+                    router.push(redirect);
+                    dispatch("fetchUser");
+                    dispatch("fetchPermissions");
+                    resolve(loginResp);
+                  })
+                  .catch((err) => {
+                    commit("auth_error");
+                    // localStorage.removeItem("token");
+                    reject(err);
+                  });
               })
               .catch((err) => {
                 commit("auth_error");
                 // localStorage.removeItem("token");
                 reject(err);
               });
-          })
-          .catch((err) => {
-            commit("auth_error");
-            // localStorage.removeItem("token");
-            reject(err);
           });
       });
     },
@@ -152,7 +178,10 @@ const store = new Vuex.Store({
         }
         axios
           .get(
-            `${process.env.VUE_APP_API_BASE_URL}/api/sounds/guildsounds/${guildId}`
+            `${
+              process.env.VUE_APP_API_BASE_URL ||
+              `${window.location.protocol}//${window.location.host}`
+            }/api/sounds/guildsounds/${guildId}`
           )
           .then((response) => {
             commit("setGuildSounds", { guildId, sounds: response.data });
@@ -169,7 +198,12 @@ const store = new Vuex.Store({
           console.log("source", source);
         }
         axios
-          .get(`${process.env.VUE_APP_API_BASE_URL}/api/guilds/all`)
+          .get(
+            `${
+              process.env.VUE_APP_API_BASE_URL ||
+              `${window.location.protocol}//${window.location.host}`
+            }/api/guilds/all`
+          )
           .then((resp) => {
             console.log(resp);
             commit("guilds", resp.data);
@@ -184,11 +218,36 @@ const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
         console.log();
         axios
-          .get(`${process.env.VUE_APP_API_BASE_URL}/api/user/self`)
+          .get(
+            `${
+              process.env.VUE_APP_API_BASE_URL ||
+              `${window.location.protocol}//${window.location.host}`
+            }/api/user/self`
+          )
           .then((resp) => {
             commit("setUser", resp.data);
             console.log("user fetched", resp.data);
             resolve();
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      });
+    },
+    fetchPermissions({ commit }) {
+      return new Promise((resolve, reject) => {
+        console.log();
+        axios
+          .get(
+            `${
+              process.env.VUE_APP_API_BASE_URL ||
+              `${window.location.protocol}//${window.location.host}`
+            }/api/permissions/all`
+          )
+          .then((resp) => {
+            commit("setPermissions", resp.data);
+            console.log("permissions fetched", resp.data);
+            resolve(resp.data);
           })
           .catch((e) => {
             reject(e);
