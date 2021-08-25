@@ -10,7 +10,7 @@
       </v-app-bar>
     </v-card-title>
     <v-card-text>
-      <v-row v-if="canManageGroups">
+      <v-row v-if="canManageGroups || guild.owner">
         <v-col cols="12" order="0">
           <h4>Permission Groups</h4>
         </v-col>
@@ -255,7 +255,7 @@
           <div class="my-5"></div>
         </v-col>
       </v-row>
-      <v-row v-if="canManageGuildSettings" justify="center">
+      <v-row v-if="canManageGuildSettings || guild.owner" justify="center">
         <v-col cols="12">
           <h4>Command Prefix</h4>
           <div class="my-3"></div>

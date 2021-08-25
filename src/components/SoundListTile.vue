@@ -50,7 +50,7 @@
           </audio>-->
         </v-menu>
 
-        <v-tooltip v-if="canUseJoinSound" bottom>
+        <v-tooltip v-if="canUseJoinSound || guild.owner" bottom>
           <template v-slot:activator="{ on }">
             <v-btn
               v-on="on"
@@ -75,7 +75,7 @@
     </v-card-subtitle>
     <v-card-actions>
       <v-btn
-        v-if="canPlaySounds"
+        v-if="canPlaySounds || guild.owner"
         :loading="soundPlaying"
         @click="playSound"
         color="success"
@@ -94,10 +94,10 @@
           <v-icon>mdi-delete-forever</v-icon>
         </v-btn>
       </div>
-      <v-spacer v-if="!isWebsite && canPlaySounds"></v-spacer>
+      <v-spacer v-if="!isWebsite && (canPlaySounds || guild.owner)"></v-spacer>
       <span v-if="!isWebsite" class="font-weight-bold">{{ hotkey }}</span>
       <v-btn
-        v-if="!hotkeys && !isWebsite && canPlaySounds"
+        v-if="!hotkeys && !isWebsite && (canPlaySounds || guild.owner)"
         @click="recordHotkey"
         :color="recording ? 'red' : 'grey'"
         text
@@ -115,7 +115,7 @@
       <v-btn
         class="hotkey-button"
         @click="deleteHotkey"
-        v-if="!!hotkeys && !isWebsite && canPlaySounds"
+        v-if="!!hotkeys && !isWebsite && (canPlaySounds || guild.owner)"
         :color="recording ? 'red' : 'black'"
         text
       >
