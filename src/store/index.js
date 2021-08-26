@@ -37,6 +37,7 @@ const store = new Vuex.Store({
     permissions: {},
     sounds: {},
     apiParameters: {},
+    commandsDescriptions: [],
   },
   getters: {
     isLoggedIn: (state) => !!state.token,
@@ -46,6 +47,7 @@ const store = new Vuex.Store({
     guilds: (state) => state.guilds,
     sounds: (state) => state.sounds,
     permissions: (state) => state.permissions,
+    commandsDescriptions: (state) => state.commandsDescriptions,
     getSortDirection: (state) => state.sortDirection,
     getSortMethod: (state) => state.sortMethod,
     getFavouriteSoundsFirst: (state) => state.favouriteSoundsFirst,
@@ -103,8 +105,24 @@ const store = new Vuex.Store({
     setApiParameters(state, payload) {
       state.apiParameters = payload;
     },
+    setCommandsDescription(state, payload) {
+      state.commandsDescriptions = payload;
+    },
   },
   actions: {
+    fetchCommandsDescriptions({ commit }) {
+      axios
+        .get(
+          (process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`) +
+            "/api/commands/all"
+        )
+        .then((response) => {
+          console.log(response.data);
+
+          commit("setCommandsDescription", response.data);
+        });
+    },
     async fetchClientDetails({ commit }) {
       const response = await axios
         .get(
