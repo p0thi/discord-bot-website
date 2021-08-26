@@ -39,124 +39,104 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col lg="6">
+      <v-col lg="8">
         <v-card>
-          <v-card-title>Commands in Server-Chat</v-card-title>
+          <v-card-title>Chat commands</v-card-title>
           <v-card-text>
-            You have to add a command prefix at the beginning of every ocmmand.
-            Normaly it is <b>!</b> (Exclamation mark). <br />
-            But maybe it got changed for some servers.<br />
+            This are all commands the bot has to offer with a description.<br />
+            Every command has to start with a <b>/</b>. When you type that, it
+            will help you find the command by auto completing what you are
+            typing. Some of the type STRING parameters have predefined values,
+            that you can pick from. E.g. <b>/group delete &lt;group&gt;</b> will
+            provide you all groups, that currently exist.
+            <br />
+            <br />
+            Instead of using <b>/play &lt;sound&gt;</b> you can use
+            <b>!&lt;sound&gt;</b> and instead of using <b>/commands</b> you can
+            use <b>!commands</b>, where <b>!</b> is the command prefix of the
+            server. <router-link to="/guilds">Here</router-link> You can find,
+            which command prefix is used in your server. <br />
 
-            <router-link to="/guilds">Here</router-link> You can find, which
-            command prefix is used in your server. <br />
-            For the sake of clarity, the standard is shown here.
+            <h2>Global slash commands</h2>
+            <div
+              v-for="command in commandsDescriptions.globalSlashCommands"
+              class="py-3"
+              :key="command.name"
+            >
+              <h3 class="mb-2">
+                <span>/{{ command.name }}</span
+                ><span v-if="command.description" class="ml-5 font-weight-light"
+                  >({{ command.description }})</span
+                >
+                <span
+                  v-if="command.permission"
+                  class="ml-5 font-weight-light"
+                  >{{ "Requires permission: " + command.permission }}</span
+                >
+              </h3>
+              <command-viewer
+                v-for="option in command.options"
+                :key="option.name"
+                :item="option"
+              ></command-viewer>
+            </div>
+            <h2>Server slash commands</h2>
+            <div
+              v-for="command in commandsDescriptions.slashCommands"
+              class="py-3"
+              :key="command.name"
+            >
+              <h3 class="mb-2">
+                <span>/{{ command.name }}</span
+                ><span v-if="command.description" class="ml-5 font-weight-light"
+                  >({{ command.description }})</span
+                >
+                <span class="ml-5 font-weight-light">{{
+                  command.permission
+                    ? "Requires permission: " + command.permission
+                    : ""
+                }}</span>
+              </h3>
+              <command-viewer
+                v-for="option in command.options"
+                :key="option.name"
+                :item="option"
+              ></command-viewer>
+            </div>
           </v-card-text>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>!&lt;sound&gt;</v-list-item-title>
-              <v-list-item-subtitle>
-                Makes me play the &lt;sound&gt;. You can see all commands by
-                sending !commands
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>!random</v-list-item-title>
-              <v-list-item-subtitle>
-                Makes me play a random sound.
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>!commands</v-list-item-title>
-              <v-list-item-subtitle>
-                Makes me show all sound commands, that are available on the
-                server
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>!download &lt;sound&gt;</v-list-item-title>
-              <v-list-item-subtitle>
-                Makes me send you the audiofile of &lt;sound&gt;. &lt;sound&gt;
-                is a sound command wihtout the command prefix (e.g. !)
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>!help</v-list-item-title>
-              <v-list-item-subtitle>Provides help.</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
         </v-card>
       </v-col>
-      <v-col lg="6">
+      <v-col lg="4">
         <v-card>
-          <v-card-title>Commands via DM to the bot</v-card-title>
+          <v-card-title>Context menu commands</v-card-title>
           <v-card-text>
-            Each of these commands triggers an action of the bot. Jeder dieser
-            Befehle löst eine Aktion beim Bot aus. The bot will then tell you
-            exactly what to do.
-            <br />Who can read has a clear advantage 😉
+            Context menu commands can be triggered by right clicking on a user
+            or a message and selecting the command in the sub-menu
+            <b>"Apps"</b>.
+            <h2>User contex menu commands</h2>
+            <div
+              v-for="command in commandsDescriptions.contextMenuCommands"
+              class="py-3"
+              :key="command.name"
+            >
+              <h3 class="mb-2">
+                <span>{{ command.name }}</span
+                ><span v-if="command.description" class="ml-5 font-weight-light"
+                  >({{ command.description }})</span
+                >
+                <span
+                  v-if="command.permission"
+                  class="ml-5 font-weight-light"
+                  >{{ "Requires permission: " + command.permission }}</span
+                >
+              </h3>
+              <command-viewer
+                v-for="option in command.options"
+                :key="option.name"
+                :item="option"
+              ></command-viewer>
+            </div>
           </v-card-text>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>upload</v-list-item-title>
-              <v-list-item-subtitle>
-                This will start the process of creating a new sound command for
-                a server. Just follow the instructions.
-                <br />You can also send me an audio file directly to start this
-                action
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>remove</v-list-item-title>
-              <v-list-item-subtitle>
-                This starts the process of permanently deleting one of your
-                sound commands from a server.
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>joinsound</v-list-item-title>
-              <v-list-item-subtitle>
-                This starts the process of setting up a join sound for you on a
-                server.
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>joinsounddelete</v-list-item-title>
-              <v-list-item-subtitle>
-                This starts the process of disabling the join sound for a
-                server.
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item two-line>
-            <v-list-item-content>
-              <v-list-item-title>help</v-list-item-title>
-              <v-list-item-subtitle>Provides help.</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
         </v-card>
       </v-col>
     </v-row>
@@ -164,8 +144,10 @@
 </template>
 <script>
 import { mapActions, mapGetters } from "vuex";
+import CommandViewer from "../components/CommandViewer";
 
 export default {
+  components: { "command-viewer": CommandViewer },
   methods: {
     ...mapActions(["fetchGuilds"]),
     navigateToAddBot() {
@@ -191,7 +173,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["getApiParameters"]),
+    ...mapGetters(["getApiParameters", "commandsDescriptions"]),
   },
   data() {
     return {
@@ -200,4 +182,12 @@ export default {
   },
 };
 </script>
-<style lang="scss"></style>
+<style scoped lang="scss">
+.command-block {
+  display: flex;
+}
+h2 {
+  margin-top: 1.5em;
+  margin-bottom: 0.2em;
+}
+</style>

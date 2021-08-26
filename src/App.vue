@@ -150,6 +150,7 @@ export default {
     this.fetchUser();
     this.fetchPermissions();
     this.fetchClientDetails();
+    this.fetchCommandsDescriptions();
     if (process.env.VUE_APP_ELECTRON_ENV) {
       ipcRenderer.on("checking-for-update", () => {});
       ipcRenderer.on("update-available", () => {
@@ -198,6 +199,7 @@ export default {
       "fetchUser",
       "fetchPermissions",
       "fetchClientDetails",
+      "fetchCommandsDescriptions",
     ]),
     ...(process.env.VUE_APP_ELECTRON_ENV && {
       restartApp() {
