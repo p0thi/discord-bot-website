@@ -105,56 +105,64 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    login({ commit, dispatch }) {
+    async fetchClientDetails({ commit }) {
+      const response = await axios
+        .get(
+          (process.env.VUE_APP_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`) +
+            "/api/auth/client_id"
+        )
+        .catch(() => console.log("Could not fetch api parameters"));
+
+      if (!response || !response.data) {
+        return;
+      }
+      console.log(response);
+      commit("setApiParameters", response.data);
+    },
+    login({ commit, dispatch, getters }) {
       return new Promise((resolve, reject) => {
         commit("auth_request");
-        axios
-          .get(
-            (process.env.VUE_APP_API_BASE_URL ||
-              `${window.location.protocol}//${window.location.host}`) +
-              "/api/auth/client_id"
-          )
-          .then((response) => {
-            console.log(response);
-            commit("setApiParameters", response.data);
-            let authHandler = new AuthHandler(
-              response.data.client_id,
-              response.data.redirect_url
-            );
-            authHandler
-              .auth()
-              .then((code) => {
-                commit("login_request");
-                authHandler
-                  .login(code)
-                  .then((loginResp) => {
-                    let token = loginResp.data.token;
-                    // localStorage.setItem("token", token);
-                    axios.defaults.headers.common["Authorization"] = token;
-                    commit("auth_success", token);
-                    const redirect = router.history.current.query.redirect
-                      ? decodeURIComponent(
-                          router.history.current.query.redirect
-                        )
-                      : "/";
-                    console.log("redirecting", redirect);
-                    router.push(redirect);
-                    dispatch("fetchUser");
-                    dispatch("fetchPermissions");
-                    resolve(loginResp);
-                  })
-                  .catch((err) => {
-                    commit("auth_error");
-                    // localStorage.removeItem("token");
-                    reject(err);
-                  });
-              })
-              .catch((err) => {
-                commit("auth_error");
-                // localStorage.removeItem("token");
-                reject(err);
-              });
-          });
+
+        dispatch("fetchClientDetails").then(() => {
+          let currentApiParams = getters.getApiParameters;
+
+          let authHandler = new AuthHandler(
+            currentApiParams.client_id,
+            currentApiParams.redirect_url
+          );
+          authHandler
+            .auth()
+            .then((code) => {
+              commit("login_request");
+              authHandler
+                .login(code)
+                .then((loginResp) => {
+                  let token = loginResp.data.token;
+                  // localStorage.setItem("token", token);
+                  axios.defaults.headers.common["Authorization"] = token;
+                  commit("auth_success", token);
+                  const redirect = router.history.current.query.redirect
+                    ? decodeURIComponent(router.history.current.query.redirect)
+                    : "/";
+                  console.log("redirecting", redirect);
+                  router.push(redirect);
+                  dispatch("fetchUser");
+                  dispatch("fetchPermissions");
+                  resolve(loginResp);
+                })
+                .catch((err) => {
+                  commit("auth_error");
+                  // localStorage.removeItem("token");
+                  reject(err);
+                });
+            })
+            .catch((err) => {
+              commit("auth_error");
+              // localStorage.removeItem("token");
+              reject(err);
+            });
+        });
       });
     },
     logout({ commit }) {

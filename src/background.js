@@ -277,14 +277,14 @@ function auth(event, uri) {
   });
 
   function onCallback(callUrl) {
-    if (callUrl.startsWith("http://localhost/api/auth/callback")) {
+    const urlParts = nodeUrl.parse(callUrl, true);
+    if (urlParts.pathname.startsWith("/api/auth/callback")) {
       setImmediate(() => {
         authWindow.close();
       });
     } else {
       return;
     }
-    const urlParts = nodeUrl.parse(callUrl, true);
     const query = urlParts.query;
     const code = query.code;
     const error = query.error;
@@ -328,14 +328,15 @@ function createWindow() {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+    // win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+    win.loadURL("http://localhost/");
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol("app");
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
+    // win.webContents.openDevTools();
   }
-  console.log("icon", icon);
   if (!appTray) {
     appTray = new Tray(icon);
   }
@@ -421,10 +422,10 @@ app.on("ready", async () => {
     }
   } else {
     Menu.setApplicationMenu(null);
+    autoUpdater.checkForUpdates();
   }
 
   createWindow();
-  autoUpdater.checkForUpdates();
 });
 
 // Exit cleanly on request from parent process in development mode.

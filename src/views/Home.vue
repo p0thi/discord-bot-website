@@ -6,7 +6,7 @@
           <v-card-title class="title">
             <span class="mr-5">Add the bot now to a discord server</span>
             <v-btn
-              href="https://discord.com/oauth2/authorize?client_id=185547264838598656&scope=bot&permissions=36830272"
+              @click="navigateToAddBot"
               target="_blank"
               large
               color="primary"
@@ -163,11 +163,35 @@
   </div>
 </template>
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   methods: {
     ...mapActions(["fetchGuilds"]),
+    navigateToAddBot() {
+      const currentClientDetails = this.getApiParameters;
+
+      console.log(currentClientDetails);
+
+      if (!currentClientDetails || !currentClientDetails.client_id) {
+        this.$toast.error(
+          `Could not get the required information of the bot. Please try again later or refresh the page.`,
+          {
+            dismissable: true,
+          }
+        );
+        return;
+      }
+      window
+        .open(
+          `https://discord.com/api/oauth2/authorize?client_id=${currentClientDetails.client_id}&permissions=36510493760&redirect_uri=http%3A%2F%2Flocalhost&scope=applications.commands%20bot`,
+          "_blank"
+        )
+        .focus();
+    },
+  },
+  computed: {
+    ...mapGetters(["getApiParameters"]),
   },
   data() {
     return {

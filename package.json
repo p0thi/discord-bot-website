@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-website",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "private": true,
   "description": "Manager for the Pothi-Bot on discord",
   "author": "Pascal Pothmann",
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.15.0",
+    "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0-beta.3",
     "@vue/cli-plugin-eslint": "~5.0.0-beta.3",
     "@vue/cli-service": "~5.0.0-beta.3",
