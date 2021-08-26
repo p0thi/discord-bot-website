@@ -384,6 +384,11 @@ function createWindow() {
   //   }
   //   return false;
   // })
+  try {
+    autoUpdater.checkForUpdates();
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 // Quit when all windows are closed.
@@ -422,7 +427,6 @@ app.on("ready", async () => {
     }
   } else {
     Menu.setApplicationMenu(null);
-    autoUpdater.checkForUpdates();
   }
 
   createWindow();

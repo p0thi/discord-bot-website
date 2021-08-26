@@ -10,7 +10,7 @@
           >{{ item.name }}</span
         >
         <span v-if="!isCommand" class="caption font-weight-light ml-2">
-          (tpye: {{ item.type }},
+          (type: {{ item.type }},
           {{ item.required ? "required" : "NOT required" }})
         </span>
       </span>

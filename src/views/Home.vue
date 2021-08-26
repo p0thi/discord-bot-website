@@ -80,6 +80,15 @@
                 :item="option"
               ></command-viewer>
             </div>
+            <h4
+              class="text-center"
+              v-if="
+                !commandsDescriptions.globalSlashCommands ||
+                commandsDescriptions.globalSlashCommands.length === 0
+              "
+            >
+              - None -
+            </h4>
             <h2>Server slash commands</h2>
             <div
               v-for="command in commandsDescriptions.slashCommands"
@@ -103,6 +112,15 @@
                 :item="option"
               ></command-viewer>
             </div>
+            <h4
+              class="text-center"
+              v-if="
+                !commandsDescriptions.slashCommands ||
+                commandsDescriptions.slashCommands.length === 0
+              "
+            >
+              - None -
+            </h4>
           </v-card-text>
         </v-card>
       </v-col>
@@ -136,6 +154,15 @@
                 :item="option"
               ></command-viewer>
             </div>
+            <h4
+              class="text-center"
+              v-if="
+                !commandsDescriptions.contextMenuCommands ||
+                commandsDescriptions.contextMenuCommands.length === 0
+              "
+            >
+              - None -
+            </h4>
           </v-card-text>
         </v-card>
       </v-col>
