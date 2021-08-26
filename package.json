@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-website",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "private": true,
   "description": "Manager for the Pothi-Bot on discord",
   "author": "Pascal Pothmann",
