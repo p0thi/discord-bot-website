@@ -65,12 +65,14 @@
             >
               <v-img v-if="activeGuild.icon" :src="activeGuild.icon"></v-img>
               <span style="color: white" v-else>{{
-                activeGuild.name.toUpperCase().charAt(0)
+                activeGuild.name
+                  ? activeGuild.name.toUpperCase().charAt(0)
+                  : "U"
               }}</span>
             </v-avatar>
           </span>
           <span v-if="!!activeGuild" class="display-1">
-            {{ activeGuild.name }}
+            {{ activeGuild.name || "Unknown Name" }}
           </span>
           <v-spacer></v-spacer>
 

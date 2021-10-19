@@ -15,7 +15,9 @@
         ></v-img>
       </v-avatar>
       <div :style="{ color: palette.second }">
-        <v-card-title class="headline">{{ guild.name }}</v-card-title>
+        <v-card-title class="headline">{{
+          guild.name || "Unknown Name"
+        }}</v-card-title>
         <v-card-subtitle :style="{ color: palette.second }">
           <div>{{ guild.sounds }} sounds (max {{ guild.maxSounds }})</div>
           <div class="body-2 font-weight-thin">
