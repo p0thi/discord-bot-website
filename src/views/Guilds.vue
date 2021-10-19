@@ -831,6 +831,8 @@ export default {
         }
       });
 
+      console.log(`Guild count: ${result.length}`);
+
       return result;
     },
     favouriteSoundsFirst: {

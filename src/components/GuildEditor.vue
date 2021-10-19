@@ -595,13 +595,13 @@ export default {
     },
     canManageGroups() {
       return (
-        this.guild.userPermissions.includes("MANAGE_GROUPS") &&
+        this.guild.userPermissions?.includes("MANAGE_GROUPS") &&
         !this.guild.banned
       );
     },
     canManageGuildSettings() {
       return (
-        this.guild.userPermissions.includes("MANAGE_GUILD_SETTINGS") &&
+        this.guild.userPermissions?.includes("MANAGE_GUILD_SETTINGS") &&
         !this.guild.banned
       );
     },

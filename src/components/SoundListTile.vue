@@ -417,19 +417,20 @@ export default {
     },
     canDeleteAllSounds() {
       return (
-        this.guild.userPermissions.includes("DELETE_ALL_SOUNDS") &&
+        this.guild.userPermissions?.includes("DELETE_ALL_SOUNDS") &&
         !this.guild.banned
       );
     },
     canUseJoinSound() {
       return (
-        this.guild.userPermissions.includes("USE_JOIN_SOUND") &&
+        this.guild.userPermissions?.includes("USE_JOIN_SOUND") &&
         !this.guild.banned
       );
     },
     canPlaySounds() {
       return (
-        this.guild.userPermissions.includes("PLAY_SOUNDS") && !this.guild.banned
+        this.guild.userPermissions?.includes("PLAY_SOUNDS") &&
+        !this.guild.banned
       );
     },
   },
