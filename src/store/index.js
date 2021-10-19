@@ -216,6 +216,8 @@ const store = new Vuex.Store({
           .catch((err) => {
             reject(err);
           });
+      }).catch(() => {
+        console.log(`Could not fetch sounds for the guild ${guildId}`);
       });
     },
     fetchGuilds({ commit }, source) {
