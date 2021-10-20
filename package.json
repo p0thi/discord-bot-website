@@ -18,7 +18,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.23.0",
     "bcrypt": "^4.0.1",
     "chroma-js": "^2.1.2",
     "core-js": "^3.6.4",
