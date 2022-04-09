@@ -26,7 +26,7 @@
     "electron-updater": "^4.2.5",
     "get-image-colors": "^2.0.0",
     "js-file-download": "^0.4.11",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "node-loader": "2.0.0",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "sass-loader": "10.1.1",
